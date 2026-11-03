@@ -180,7 +180,8 @@
                     <div class="hidden sm:flex items-center space-x-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
                         <span class="text-xs font-semibold text-slate-500"><i class="fa-solid fa-calendar mr-1"></i> ปี พ.ศ.:</span>
                         <select id="globalYear" onchange="filterData()" class="bg-transparent text-xs font-bold text-slate-800 focus:outline-none cursor-pointer">
-                            <option value="2553">พ.ศ. 2553</option>
+                            <option value="all">ทุกปี พ.ศ.</option>
+                            <option value="2553" selected>พ.ศ. 2553</option>
                             <option value="2543">พ.ศ. 2543</option>
                             <option value="2533">พ.ศ. 2533</option>
                         </select>
@@ -224,7 +225,7 @@
                         <div>
                             <p class="text-xs font-medium text-blue-100 uppercase tracking-wider">ประชากรสุทธิ (Total Population)</p>
                             <h3 class="text-3xl font-extrabold mt-1 tracking-tight" id="kpiTotalPop">65,981,659</h3>
-                            <p class="text-[11px] text-blue-100/80 mt-1">อ้างอิงสำนักงานสถิติแห่งชาติ</p>
+                            <p class="text-[11px] text-blue-100/80 mt-1">อ้างอิงข้อมูลที่กรองอยู่ขณะนี้</p>
                         </div>
                     </div>
 
@@ -239,7 +240,7 @@
                         <div>
                             <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">ประชากรชาย (Male)</p>
                             <h3 class="text-3xl font-bold text-slate-800 mt-1 tracking-tight" id="kpiMalePop">32,355,032</h3>
-                            <p class="text-[11px] text-slate-400 mt-1">จำแนกตามทะเบียนราษฎร์</p>
+                            <p class="text-[11px] text-slate-400 mt-1">จำแนกตามเพศชาย</p>
                         </div>
                     </div>
 
@@ -254,7 +255,7 @@
                         <div>
                             <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">ประชากรหญิง (Female)</p>
                             <h3 class="text-3xl font-bold text-slate-800 mt-1 tracking-tight" id="kpiFemalePop">33,626,627</h3>
-                            <p class="text-[11px] text-slate-400 mt-1">จำแนกตามทะเบียนราษฎร์</p>
+                            <p class="text-[11px] text-slate-400 mt-1">จำแนกตามเพศหญิง</p>
                         </div>
                     </div>
 
@@ -281,7 +282,7 @@
                         <div class="flex items-center justify-between mb-6">
                             <div>
                                 <h3 class="text-base font-bold text-slate-800">แนวโน้มการเติบโตของประชากร</h3>
-                                <p class="text-xs text-slate-400">เปรียบเทียบข้อมูลสำมะโนประชากร (กดที่จุดเพื่อกรองตามปี)</p>
+                                <p class="text-xs text-slate-400">เปรียบเทียบข้อมูลสำมะโนประชากร (กดที่จุดปี พ.ศ. เพื่อกรองตามปี)</p>
                             </div>
                             <span class="px-3 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded-xl">Interactive Trend</span>
                         </div>
@@ -295,13 +296,12 @@
                         <div class="flex items-center justify-between mb-4">
                             <div>
                                 <h3 class="text-base font-bold text-slate-800">สัดส่วนประชากรรายภูมิภาค</h3>
-                                <p class="text-xs text-slate-400">💡 คลิกที่ส่วนของ Chart เพื่อกรองข้อมูลรายภาค</p>
+                                <p class="text-xs text-slate-400">💡 คลิกที่ส่วนของ Donut Chart เพื่อกรองข้อมูลรายภาค</p>
                             </div>
                         </div>
                         <div class="flex-1 relative h-64 flex items-center justify-center">
                             <canvas id="regionChart" class="cursor-pointer"></canvas>
                         </div>
-                        <div id="regionLegend" class="mt-4 grid grid-cols-2 gap-2 text-xs text-slate-600"></div>
                     </div>
                 </div>
 
@@ -330,15 +330,15 @@
                             <div class="space-y-4">
                                 <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
                                     <span class="text-xs font-semibold text-slate-400 block mb-1">ช่วงอายุที่มีประชากรมากที่สุด</span>
-                                    <h4 id="topAgeGroup" class="text-sm font-bold text-slate-800">40 - 44 ปี (5,672,012 คน)</h4>
+                                    <h4 id="topAgeGroup" class="text-sm font-bold text-slate-800">40 - 44 ปี</h4>
                                 </div>
                                 <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
                                     <span class="text-xs font-semibold text-slate-400 block mb-1">ภูมิภาคที่มีประชากรสูงสุด</span>
-                                    <h4 id="topRegionGroup" class="text-sm font-bold text-slate-800">ภาคตะวันออกเฉียงเหนือ (18,966,090 คน)</h4>
+                                    <h4 id="topRegionGroup" class="text-sm font-bold text-slate-800">ภาคตะวันออกเฉียงเหนือ</h4>
                                 </div>
                                 <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                                    <span class="text-xs font-semibold text-slate-400 block mb-1">สัดส่วนเพศหญิงต่อชาย</span>
-                                    <h4 class="text-sm font-bold text-slate-800">หญิง 103.9 คน ต่อ ชาย 100 คน</h4>
+                                    <span class="text-xs font-semibold text-slate-400 block mb-1">จำนวนรายการในฐานข้อมูลปัจจุบัน</span>
+                                    <h4 id="totalRecordsCount" class="text-sm font-bold text-slate-800">0 รายการ</h4>
                                 </div>
                             </div>
                         </div>
@@ -348,12 +348,12 @@
                     </div>
                 </div>
 
-                <!-- DETAILED DATA TABLE SECTION -->
+                <!-- DETAILED DATA TABLE SECTION WITH CRUD ACTIONS -->
                 <div class="bg-white rounded-[24px] p-6 card-shadow border border-slate-100">
                     <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
                         <div>
-                            <h3 class="text-base font-bold text-slate-800">ตารางข้อมูลดิบสำมะโนประชากร (Census Records)</h3>
-                            <p class="text-xs text-slate-400">แสดงผลข้อมูลที่กรองแบบ Realtime สามารถค้นหาเพิ่มเติมได้</p>
+                            <h3 class="text-base font-bold text-slate-800">ตารางข้อมูลดิบสำมะโนประชากร (Census Records - Live CRUD)</h3>
+                            <p class="text-xs text-slate-400">แสดงผลข้อมูลที่กรองแบบ Realtime สามารถค้นหา เพิ่ม แก้ไข หรือลบข้อมูลได้ทันที</p>
                         </div>
                         <div class="w-full sm:w-auto flex items-center space-x-3">
                             <div class="relative w-full sm:w-64">
@@ -362,6 +362,9 @@
                                 </span>
                                 <input type="text" id="tableSearch" onkeyup="filterTable()" placeholder="ค้นหาจังหวัด, ภาค, ช่วงอายุ..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
+                            <button id="addRecordBtn" onclick="openRecordModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all flex items-center whitespace-nowrap shadow-md shadow-blue-600/30">
+                                <i class="fa-solid fa-plus mr-1.5"></i> เพิ่มข้อมูลใหม่
+                            </button>
                         </div>
                     </div>
                     <div class="overflow-x-auto">
@@ -374,7 +377,8 @@
                                     <th class="py-3 px-4">พื้นที่</th>
                                     <th class="py-3 px-4">เพศ</th>
                                     <th class="py-3 px-4">ช่วงอายุ</th>
-                                    <th class="py-3 px-4 text-right rounded-r-xl">จำนวน (คน)</th>
+                                    <th class="py-3 px-4 text-right">จำนวน (คน)</th>
+                                    <th class="py-3 px-4 text-center rounded-r-xl crud-action-col">จัดการ</th>
                                 </tr>
                             </thead>
                             <tbody id="dataTableBody" class="text-xs divide-y divide-slate-100 font-medium text-slate-600">
@@ -460,6 +464,72 @@
         </div>
     </div>
 
+    <!-- EDIT/ADD CENSUS RECORD MODAL (DATA CRUD) -->
+    <div id="recordModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 hidden">
+        <div class="bg-white rounded-[24px] card-shadow w-full max-w-md p-6 border border-slate-100">
+            <div class="flex items-center justify-between mb-4">
+                <h3 id="recordModalTitle" class="text-base font-bold text-slate-800">เพิ่ม/แก้ไข รายการข้อมูลสำมะโน</h3>
+                <button onclick="closeRecordModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="recordForm" onsubmit="saveRecord(event)" class="space-y-4">
+                <input type="hidden" id="editRecordIndex">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">ปี พ.ศ.</label>
+                        <input type="number" id="recordYear" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50" placeholder="2553">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">ภูมิภาค</label>
+                        <select id="recordRegion" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50">
+                            <option value="กรุงเทพมหานคร">กรุงเทพมหานคร</option>
+                            <option value="ภาคกลาง">ภาคกลาง</option>
+                            <option value="ภาคเหนือ">ภาคเหนือ</option>
+                            <option value="ภาคตะวันออกเฉียงเหนือ">ภาคตะวันออกเฉียงเหนือ</option>
+                            <option value="ภาคใต้">ภาคใต้</option>
+                            <option value="ทั่วประเทศ">ทั่วประเทศ</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">จังหวัด</label>
+                        <input type="text" id="recordProvince" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50" placeholder="รวม / กรุงเทพฯ">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">เขตพื้นที่</label>
+                        <select id="recordArea" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50">
+                            <option value="รวม">รวม</option>
+                            <option value="ในเขตเทศบาล">ในเขตเทศบาล</option>
+                            <option value="นอกเขตเทศบาล">นอกเขตเทศบาล</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">เพศ</label>
+                        <select id="recordSex" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50">
+                            <option value="รวม">รวม</option>
+                            <option value="ชาย">ชาย</option>
+                            <option value="หญิง">หญิง</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">ช่วงอายุ</label>
+                        <input type="text" id="recordAgeGroup" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50" placeholder="รวม หรือ เช่น 20 - 24 ปี">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">จำนวนประชากร (คน)</label>
+                    <input type="number" id="recordValue" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50" placeholder="ระบุจำนวนตัวเลข">
+                </div>
+                <div class="flex justify-end space-x-3 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="closeRecordModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-semibold hover:bg-slate-200">ยกเลิก</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-semibold hover:bg-blue-700 shadow-md shadow-blue-600/30">บันทึกข้อมูล</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- ADD/EDIT USER MODAL -->
     <div id="userModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 hidden">
         <div class="bg-white rounded-[24px] card-shadow w-full max-w-md p-6 border border-slate-100">
@@ -485,7 +555,7 @@
                     <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">บทบาทสิทธิ์ (Role)</label>
                     <select id="modalRole" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50">
                         <option value="Admin">Admin (สิทธิ์เต็ม + จัดการสมาชิก)</option>
-                        <option value="Analyst">Analyst (ดูสถิติ + อัปโหลดข้อมูล)</option>
+                        <option value="Analyst">Analyst (ดูสถิติ + แก้ไขข้อมูล + อัปโหลดข้อมูล)</option>
                         <option value="Viewer">Viewer (เข้าดู Dashboard และกรองข้อมูลได้อย่างเดียว)</option>
                     </select>
                 </div>
@@ -511,42 +581,42 @@
         let activeInteractiveAge = null;
         let activeInteractiveRegion = null;
 
-        // Census dataset
+        // Census dataset (Master Data State)
         let censusData = [
-            { year: 2533, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: 'รวม', value: 54548530 },
-            { year: 2533, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'ชาย', age_group: 'รวม', value: 27061733 },
-            { year: 2533, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'หญิง', age_group: 'รวม', value: 27486797 },
-            { year: 2543, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: 'รวม', value: 60916441 },
-            { year: 2543, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'ชาย', age_group: 'รวม', value: 30015233 },
-            { year: 2543, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'หญิง', age_group: 'รวม', value: 30901208 },
-            { year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: 'รวม', value: 65981659 },
-            { year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'ชาย', age_group: 'รวม', value: 32355032 },
-            { year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'หญิง', age_group: 'รวม', value: 33626627 },
-            { year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'ในเขตเทศบาล', sex: 'รวม', age_group: 'รวม', value: 29133829 },
-            { year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'นอกเขตเทศบาล', sex: 'รวม', age_group: 'รวม', value: 36847830 },
-            { year: 2553, region: 'กรุงเทพมหานคร', province: 'กรุงเทพมหานคร', area: 'รวม', sex: 'รวม', age_group: 'รวม', value: 8305218 },
-            { year: 2553, region: 'ภาคกลาง', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: 'รวม', value: 18183308 },
-            { year: 2553, region: 'ภาคเหนือ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: 'รวม', value: 11656040 },
-            { year: 2553, region: 'ภาคตะวันออกเฉียงเหนือ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: 'รวม', value: 18966090 },
-            { year: 2553, region: 'ภาคใต้', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: 'รวม', value: 8871002 },
+            { id: 1, year: 2533, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: 'รวม', value: 54548530 },
+            { id: 2, year: 2533, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'ชาย', age_group: 'รวม', value: 27061733 },
+            { id: 3, year: 2533, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'หญิง', age_group: 'รวม', value: 27486797 },
+            { id: 4, year: 2543, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: 'รวม', value: 60916441 },
+            { id: 5, year: 2543, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'ชาย', age_group: 'รวม', value: 30015233 },
+            { id: 6, year: 2543, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'หญิง', age_group: 'รวม', value: 30901208 },
+            { id: 7, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: 'รวม', value: 65981659 },
+            { id: 8, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'ชาย', age_group: 'รวม', value: 32355032 },
+            { id: 9, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'หญิง', age_group: 'รวม', value: 33626627 },
+            { id: 10, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'ในเขตเทศบาล', sex: 'รวม', age_group: 'รวม', value: 29133829 },
+            { id: 11, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'นอกเขตเทศบาล', sex: 'รวม', age_group: 'รวม', value: 36847830 },
+            { id: 12, year: 2553, region: 'กรุงเทพมหานคร', province: 'กรุงเทพมหานคร', area: 'รวม', sex: 'รวม', age_group: 'รวม', value: 8305218 },
+            { id: 13, year: 2553, region: 'ภาคกลาง', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: 'รวม', value: 18183308 },
+            { id: 14, year: 2553, region: 'ภาคเหนือ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: 'รวม', value: 11656040 },
+            { id: 15, year: 2553, region: 'ภาคตะวันออกเฉียงเหนือ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: 'รวม', value: 18966090 },
+            { id: 16, year: 2553, region: 'ภาคใต้', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: 'รวม', value: 8871002 },
             // Age groups 2553
-            { year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '0 - 4 ปี', value: 3739868 },
-            { year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '5 - 9 ปี', value: 4081644 },
-            { year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '10 - 14 ปี', value: 4864280 },
-            { year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '15 - 19 ปี', value: 4900590 },
-            { year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '20 - 24 ปี', value: 4691520 },
-            { year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '25 - 29 ปี', value: 5092597 },
-            { year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '30 - 34 ปี', value: 5394917 },
-            { year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '35 - 39 ปี', value: 5614849 },
-            { year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '40 - 44 ปี', value: 5672012 },
-            { year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '45 - 49 ปี', value: 5266065 },
-            { year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '50 - 54 ปี', value: 4588033 },
-            { year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '55 - 59 ปี', value: 3567088 },
-            { year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '60 - 64 ปี', value: 2765397 },
-            { year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '65 - 69 ปี', value: 1933352 },
-            { year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '70 - 74 ปี', value: 1607639 },
-            { year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '75 - 79 ปี', value: 1123385 },
-            { year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '80 ปีขึ้นไป', value: 1078423 }
+            { id: 17, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '0 - 4 ปี', value: 3739868 },
+            { id: 18, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '5 - 9 ปี', value: 4081644 },
+            { id: 19, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '10 - 14 ปี', value: 4864280 },
+            { id: 20, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '15 - 19 ปี', value: 4900590 },
+            { id: 21, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '20 - 24 ปี', value: 4691520 },
+            { id: 22, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '25 - 29 ปี', value: 5092597 },
+            { id: 23, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '30 - 34 ปี', value: 5394917 },
+            { id: 24, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '35 - 39 ปี', value: 5614849 },
+            { id: 25, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '40 - 44 ปี', value: 5672012 },
+            { id: 26, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '45 - 49 ปี', value: 5266065 },
+            { id: 27, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '50 - 54 ปี', value: 4588033 },
+            { id: 28, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '55 - 59 ปี', value: 3567088 },
+            { id: 29, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '60 - 64 ปี', value: 2765397 },
+            { id: 30, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '65 - 69 ปี', value: 1933352 },
+            { id: 31, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '70 - 74 ปี', value: 1607639 },
+            { id: 32, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '75 - 79 ปี', value: 1123385 },
+            { id: 33, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '80 ปีขึ้นไป', value: 1078423 }
         ];
 
         let currentPage = 1;
@@ -634,16 +704,20 @@
             // Handle UI access based on role (Admin, Analyst, Viewer)
             const memberNav = document.getElementById('nav-members');
             const dataCenterNav = document.getElementById('nav-datacenters');
+            const addRecordBtn = document.getElementById('addRecordBtn');
 
             if(currentUser.role === 'Admin') {
                 memberNav.style.display = 'flex';
                 dataCenterNav.style.display = 'flex';
+                if(addRecordBtn) addRecordBtn.style.display = 'flex';
             } else if(currentUser.role === 'Analyst') {
                 memberNav.style.display = 'none';
                 dataCenterNav.style.display = 'flex';
+                if(addRecordBtn) addRecordBtn.style.display = 'flex';
             } else if(currentUser.role === 'Viewer') {
                 memberNav.style.display = 'none';
                 dataCenterNav.style.display = 'none';
+                if(addRecordBtn) addRecordBtn.style.display = 'none';
             }
 
             filterData();
@@ -675,20 +749,46 @@
             }
         }
 
-        // FILTER & STATS
-        function filterData() {
-            const yr = parseInt(document.getElementById('globalYear').value);
+        // REALTIME FILTERING & CALCULATION ENGINE
+        function getFilteredDataset() {
+            const yrVal = document.getElementById('globalYear').value;
             const regSelect = document.getElementById('globalRegion').value;
             const reg = activeInteractiveRegion || regSelect;
 
-            // Compute KPIs based on interactive filters
-            let totalPop = censusData.find(x => x.year === yr && x.region === reg && x.sex === 'รวม' && x.age_group === (activeInteractiveAge || 'รวม'))?.value;
-            if(!totalPop) {
-                totalPop = censusData.find(x => x.year === yr && x.region === reg && x.sex === 'รวม' && x.age_group === 'รวม')?.value || 65981659;
-            }
+            return censusData.filter(item => {
+                const matchYear = yrVal === 'all' || item.year === parseInt(yrVal);
+                const matchRegion = reg === 'all' || item.region === reg;
+                const matchAge = !activeInteractiveAge || item.age_group === activeInteractiveAge;
+                return matchYear && matchRegion && matchAge;
+            });
+        }
 
-            let malePop = censusData.find(x => x.year === yr && x.region === reg && x.sex === 'ชาย' && x.age_group === (activeInteractiveAge || 'รวม'))?.value || Math.round(totalPop * 0.49);
-            let femalePop = censusData.find(x => x.year === yr && x.region === reg && x.sex === 'หญิง' && x.age_group === (activeInteractiveAge || 'รวม'))?.value || Math.round(totalPop * 0.51);
+        function filterData() {
+            const filteredSet = getFilteredDataset();
+            const yrVal = document.getElementById('globalYear').value;
+            const regSelect = document.getElementById('globalRegion').value;
+            const reg = activeInteractiveRegion || regSelect;
+
+            // 1. Calculate Total Population
+            let totalPop = 0;
+            // Sum records with total markers first
+            const totals = filteredSet.filter(x => x.sex === 'รวม' && x.age_group === (activeInteractiveAge || 'รวม') && x.province === 'รวม' && x.area === 'รวม');
+            if(totals.length > 0) {
+                totalPop = totals.reduce((sum, item) => sum + item.value, 0);
+            } else {
+                // Sum all matching record values if no summary row exists
+                totalPop = filteredSet.reduce((sum, item) => sum + item.value, 0);
+            }
+            if(totalPop === 0) totalPop = 65981659; // Fallback default
+
+            // 2. Male / Female Calculations
+            let malePop = filteredSet.filter(x => x.sex === 'ชาย' && x.age_group === (activeInteractiveAge || 'รวม')).reduce((sum, item) => sum + item.value, 0);
+            let femalePop = filteredSet.filter(x => x.sex === 'หญิง' && x.age_group === (activeInteractiveAge || 'รวม')).reduce((sum, item) => sum + item.value, 0);
+
+            if(malePop === 0 && femalePop === 0) {
+                malePop = Math.round(totalPop * 0.49);
+                femalePop = Math.round(totalPop * 0.51);
+            }
 
             document.getElementById('kpiTotalPop').innerText = totalPop.toLocaleString();
             document.getElementById('kpiMalePop').innerText = malePop.toLocaleString();
@@ -696,31 +796,47 @@
 
             let malePct = ((malePop / totalPop) * 100).toFixed(1);
             let femalePct = ((femalePop / totalPop) * 100).toFixed(1);
-            document.getElementById('kpiMalePct').innerText = malePct + '%';
-            document.getElementById('kpiFemalePct').innerText = femalePct + '%';
+            document.getElementById('kpiMalePct').innerText = isNaN(malePct) ? '0%' : malePct + '%';
+            document.getElementById('kpiFemalePct').innerText = isNaN(femalePct) ? '0%' : femalePct + '%';
 
-            let urbanPop = Math.round(totalPop * 0.441), ruralPop = totalPop - urbanPop;
+            // 3. Urban vs Rural
+            let urbanRecord = filteredSet.find(x => x.area === 'ในเขตเทศบาล' && x.sex === 'รวม');
+            let urbanPop = urbanRecord ? urbanRecord.value : Math.round(totalPop * 0.441);
+            let ruralPop = totalPop - urbanPop;
+            if(ruralPop < 0) ruralPop = Math.round(totalPop * 0.559);
+
             document.getElementById('kpiUrbanPop').innerText = urbanPop.toLocaleString();
             document.getElementById('kpiRuralPop').innerText = ruralPop.toLocaleString();
-            document.getElementById('kpiUrbanPct').innerText = ((urbanPop/totalPop)*100).toFixed(1) + '% ในเขต';
+            document.getElementById('kpiUrbanPct').innerText = (((urbanPop/totalPop)*100) || 44.1).toFixed(1) + '% ในเขต';
+            document.getElementById('totalRecordsCount').innerText = censusData.length.toLocaleString() + ' รายการ';
 
             updateFilterBadge();
-            renderCharts(yr, reg);
+            renderCharts(yrVal, reg);
             renderTable();
         }
 
-        // CHARTS RENDERING WITH INTERACTIVE CROSS-FILTERING
-        function renderCharts(yr, reg) {
-            // 1. Trend Chart
+        // CHARTS RENDERING WITH REALTIME INTERACTIVE CROSS-FILTERING
+        function renderCharts(yrVal, reg) {
+            // 1. Trend Line Chart
             const ctxTrend = document.getElementById('trendChart').getContext('2d');
             if(trendChartObj) trendChartObj.destroy();
+            
+            // Calculate trend totals per year
+            const years = [2533, 2543, 2553];
+            const trendTotals = years.map(y => {
+                const row = censusData.find(x => x.year === y && x.region === reg && x.sex === 'รวม' && x.age_group === 'รวม' && x.province === 'รวม');
+                if(row) return row.value;
+                const sum = censusData.filter(x => x.year === y && (reg === 'all' || x.region === reg) && x.sex === 'รวม').reduce((s, i) => s + i.value, 0);
+                return sum || (y === 2533 ? 54548530 : y === 2543 ? 60916441 : 65981659);
+            });
+
             trendChartObj = new Chart(ctxTrend, {
                 type: 'line',
                 data: {
                     labels: ['พ.ศ. 2533', 'พ.ศ. 2543', 'พ.ศ. 2553'],
                     datasets: [{
                         label: 'ประชากรสุทธิ (คน)',
-                        data: [54548530, 60916441, 65981659],
+                        data: trendTotals,
                         borderColor: '#3b82f6',
                         backgroundColor: 'rgba(59, 130, 246, 0.1)',
                         borderWidth: 3,
@@ -737,7 +853,7 @@
                     onClick: (e, activeEls) => {
                         if (activeEls.length > 0) {
                             const index = activeEls[0].index;
-                            const selectedYear = [2533, 2543, 2553][index];
+                            const selectedYear = years[index];
                             document.getElementById('globalYear').value = selectedYear;
                             filterData();
                         }
@@ -749,14 +865,20 @@
             const ctxRegion = document.getElementById('regionChart').getContext('2d');
             if(regionChartObj) regionChartObj.destroy();
             const regionLabels = ['ภาคตะวันออกเฉียงเหนือ', 'ภาคกลาง', 'ภาคเหนือ', 'ภาคใต้', 'กรุงเทพมหานคร'];
-            const regionColors = regionLabels.map(r => r === activeInteractiveRegion ? '#1d4ed8' : '#3b82f6');
+            
+            // Calculate regional data dynamically
+            const targetYear = yrVal === 'all' ? 2553 : parseInt(yrVal);
+            const regionValues = regionLabels.map(r => {
+                const rec = censusData.find(x => x.year === targetYear && x.region === r && x.sex === 'รวม' && x.age_group === 'รวม');
+                return rec ? rec.value : 0;
+            });
             
             regionChartObj = new Chart(ctxRegion, {
                 type: 'doughnut',
                 data: {
                     labels: regionLabels,
                     datasets: [{
-                        data: [18966090, 18183308, 11656040, 8871002, 8305218],
+                        data: regionValues,
                         backgroundColor: ['#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#1e40af'],
                         hoverOffset: 12
                     }]
@@ -764,13 +886,13 @@
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false, 
-                    plugins: { legend: { display: false } },
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } },
                     onClick: (e, activeEls) => {
                         if (activeEls.length > 0) {
                             const index = activeEls[0].index;
                             const selectedRegion = regionLabels[index];
                             if(activeInteractiveRegion === selectedRegion) {
-                                activeInteractiveRegion = null; // toggle off
+                                activeInteractiveRegion = null;
                             } else {
                                 activeInteractiveRegion = selectedRegion;
                             }
@@ -781,7 +903,8 @@
             });
 
             // 3. Age Group Chart (Bar)
-            const ageItems = censusData.filter(x => x.year === yr && x.age_group !== 'รวม' && x.sex === 'รวม');
+            const targetYr = yrVal === 'all' ? 2553 : parseInt(yrVal);
+            const ageItems = censusData.filter(x => x.year === targetYr && x.age_group !== 'รวม' && x.sex === 'รวม' && (reg === 'all' || x.region === reg));
             const ctxAge = document.getElementById('ageChart').getContext('2d');
             if(ageChartObj) ageChartObj.destroy();
             
@@ -794,7 +917,7 @@
                     datasets: [{
                         label: 'จำนวนประชากร (คน)',
                         data: ageItems.map(x => x.value),
-                        backgroundColor: ageColors,
+                        backgroundColor: ageColors.length ? ageColors : '#3b82f6',
                         borderRadius: 6
                     }]
                 },
@@ -807,7 +930,7 @@
                             const index = activeEls[0].index;
                             const selectedAge = ageItems[index].age_group;
                             if(activeInteractiveAge === selectedAge) {
-                                activeInteractiveAge = null; // toggle off
+                                activeInteractiveAge = null;
                             } else {
                                 activeInteractiveAge = selectedAge;
                             }
@@ -818,17 +941,17 @@
             });
         }
 
-        // TABLE & PAGINATION
+        // TABLE & PAGINATION WITH CRUD ACTIONS
         function getFilteredTableData() {
             const query = document.getElementById('tableSearch').value.toLowerCase();
-            const yr = parseInt(document.getElementById('globalYear').value);
+            const yrVal = document.getElementById('globalYear').value;
             const regSelect = document.getElementById('globalRegion').value;
             const reg = activeInteractiveRegion || regSelect;
 
             return censusData.filter(item => {
-                const matchYear = item.year === yr;
+                const matchYear = yrVal === 'all' || item.year === parseInt(yrVal);
                 const matchRegion = reg === 'all' || item.region === reg;
-                const matchAge = !activeInteractiveAge || item.age_group === activeInteractiveAge || item.age_group === 'รวม';
+                const matchAge = !activeInteractiveAge || item.age_group === activeInteractiveAge;
                 const matchQuery = item.province.toLowerCase().includes(query) ||
                                    item.region.toLowerCase().includes(query) ||
                                    item.age_group.toLowerCase().includes(query) ||
@@ -848,7 +971,18 @@
             const tbody = document.getElementById('dataTableBody');
             tbody.innerHTML = '';
 
+            const canEdit = currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Analyst');
+
             paginated.forEach(row => {
+                const actionBtns = canEdit ? `
+                    <button onclick="openEditRecordModal(${row.id})" class="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-all mr-1" title="แก้ไขรายการ">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+                    <button onclick="deleteRecord(${row.id})" class="text-rose-500 hover:text-rose-700 p-1 rounded hover:bg-rose-50 transition-all" title="ลบรายการ">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                ` : `<span class="text-slate-300 text-[10px]">ดูอย่างเดียว</span>`;
+
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50/80 transition-all">
                         <td class="py-3 px-4 font-semibold text-slate-800">${row.year}</td>
@@ -858,11 +992,12 @@
                         <td class="py-3 px-4"><span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md text-[10px] font-semibold">${row.sex}</span></td>
                         <td class="py-3 px-4">${row.age_group}</td>
                         <td class="py-3 px-4 text-right font-bold text-slate-800">${row.value.toLocaleString()}</td>
+                        <td class="py-3 px-4 text-center crud-action-col">${actionBtns}</td>
                     </tr>
                 `;
             });
 
-            document.getElementById('tableCount').innerText = `แสดงผล ${filtered.length} รายการ`;
+            document.getElementById('tableCount').innerText = `แสดงผล ${filtered.length} จากทั้งหมด ${censusData.length} รายการ`;
             document.getElementById('pageIndicator').innerText = `หน้า ${currentPage} / ${totalPages}`;
             document.getElementById('prevBtn').disabled = currentPage === 1;
             document.getElementById('nextBtn').disabled = currentPage === totalPages;
@@ -882,6 +1017,77 @@
             if(currentPage < totalPages) { currentPage++; renderTable(); }
         }
 
+        // CENSUS DATA CRUD OPERATIONS
+        function openRecordModal() {
+            document.getElementById('recordModalTitle').innerText = 'เพิ่มข้อมูลสำมะโนประชากรใหม่';
+            document.getElementById('editRecordIndex').value = '';
+            document.getElementById('recordYear').value = 2553;
+            document.getElementById('recordRegion').value = 'ภาคกลาง';
+            document.getElementById('recordProvince').value = 'รวม';
+            document.getElementById('recordArea').value = 'รวม';
+            document.getElementById('recordSex').value = 'รวม';
+            document.getElementById('recordAgeGroup').value = 'รวม';
+            document.getElementById('recordValue').value = '';
+            document.getElementById('recordModal').classList.remove('hidden');
+        }
+
+        function openEditRecordModal(id) {
+            const rec = censusData.find(x => x.id === id);
+            if(!rec) return;
+            document.getElementById('recordModalTitle').innerText = 'แก้ไขข้อมูลสำมะโนประชากร';
+            document.getElementById('editRecordIndex').value = rec.id;
+            document.getElementById('recordYear').value = rec.year;
+            document.getElementById('recordRegion').value = rec.region;
+            document.getElementById('recordProvince').value = rec.province;
+            document.getElementById('recordArea').value = rec.area;
+            document.getElementById('recordSex').value = rec.sex;
+            document.getElementById('recordAgeGroup').value = rec.age_group;
+            document.getElementById('recordValue').value = rec.value;
+            document.getElementById('recordModal').classList.remove('hidden');
+        }
+
+        function closeRecordModal() {
+            document.getElementById('recordModal').classList.add('hidden');
+        }
+
+        function saveRecord(e) {
+            e.preventDefault();
+            const id = document.getElementById('editRecordIndex').value;
+            const year = parseInt(document.getElementById('recordYear').value);
+            const region = document.getElementById('recordRegion').value;
+            const province = document.getElementById('recordProvince').value.trim();
+            const area = document.getElementById('recordArea').value;
+            const sex = document.getElementById('recordSex').value;
+            const age_group = document.getElementById('recordAgeGroup').value.trim();
+            const value = parseInt(document.getElementById('recordValue').value);
+
+            if(id) {
+                const rec = censusData.find(x => x.id == id);
+                if(rec) {
+                    rec.year = year;
+                    rec.region = region;
+                    rec.province = province;
+                    rec.area = area;
+                    rec.sex = sex;
+                    rec.age_group = age_group;
+                    rec.value = value;
+                }
+            } else {
+                const newId = censusData.length ? Math.max(...censusData.map(x => x.id)) + 1 : 1;
+                censusData.unshift({ id: newId, year, region, province, area, sex, age_group, value });
+            }
+
+            closeRecordModal();
+            filterData(); // Recalculate Dashboard & Redraw Charts Realtime
+        }
+
+        function deleteRecord(id) {
+            if(confirm('คุณแน่ใจหรือไม่ที่จะลบรายการข้อมูลนี้?')) {
+                censusData = censusData.filter(x => x.id !== id);
+                filterData(); // Recalculate Dashboard & Redraw Charts Realtime
+            }
+        }
+
         // FILE UPLOAD & PARSING (EXCEL / CSV)
         function handleFileUpload(e) {
             const file = e.target.files[0];
@@ -899,7 +1105,9 @@
                     let addedCount = 0;
                     json.forEach(row => {
                         if(row.year && row.region && row.value) {
-                            censusData.push({
+                            const newId = censusData.length ? Math.max(...censusData.map(x => x.id)) + 1 : 1;
+                            censusData.unshift({
+                                id: newId,
                                 year: parseInt(row.year),
                                 region: row.region,
                                 province: row.province || 'รวม',
