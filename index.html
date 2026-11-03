@@ -1,1232 +1,1067 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en" class="h-full bg-[#f3f4f6]">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thailand Census SaaS Dashboard</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Thailand Census Analytics Platform</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- SheetJS (xlsx) for Excel/CSV parsing -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- Google Fonts: Inter & Prompt -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome Icons -->
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS for Excel handling -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#3b82f6',
-                        dark: '#1e293b',
-                        cardbg: '#ffffff',
-                        canvasbg: '#f3f4f8'
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            200: '#a7f3d0',
+                            300: '#6ee7b7',
+                            400: '#34d399',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                            dark: '#01382b'
+                        },
+                        bgMain: '#f2f4f7'
                     },
                     fontFamily: {
-                        sans: ['Prompt', 'Inter', 'sans-serif'],
+                        sans: ['"Plus Jakarta Sans"', '"Prompt"', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 30px -5px rgba(6, 78, 59, 0.04), 0 4px 12px -2px rgba(0, 0, 0, 0.02)',
+                        'card': '0 4px 20px 0 rgba(0, 0, 0, 0.03)',
+                        'pill': '0 2px 6px rgba(0, 0, 0, 0.04)'
                     }
                 }
             }
         }
     </script>
     <style>
-        body { font-family: 'Prompt', 'Inter', sans-serif; background-color: #f3f4f8; }
-        .card-shadow { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05); }
-        /* Custom scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        
-        /* Collapsed Sidebar styles for Desktop */
-        body.sidebar-collapsed #sidebar {
-            width: 80px !important;
+        body {
+            font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif;
+            background-color: #f2f4f7;
+            color: #1f2937;
         }
-        body.sidebar-collapsed #sidebar .logo-text,
-        body.sidebar-collapsed #sidebar .nav-text,
-        body.sidebar-collapsed #sidebar .user-info,
-        body.sidebar-collapsed #sidebar .menu-header {
-            display: none !important;
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
         }
-        body.sidebar-collapsed #sidebar .nav-link {
-            justify-content: center !important;
-            padding-left: 0 !important;
-            padding-right: 0 !important;
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
         }
-        body.sidebar-collapsed #sidebar .user-box {
-            padding: 8px !important;
-            margin: 8px !important;
-            justify-content: center !important;
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
         }
-        body.sidebar-collapsed #mainContent {
-            margin-left: 80px !important;
+        ::-webkit-scrollbar-thumb:hover {
+            background: #059669;
         }
     </style>
 </head>
-<body class="bg-[#f3f4f8] text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="h-full text-slate-800 antialiased selection:bg-brand-200 selection:text-brand-900">
 
-    <!-- AUTH LOCKOUT MODAL (BLOCKS ALL CONTENT UNTIL LOGGED IN) -->
-    <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-        <div class="bg-white rounded-[24px] card-shadow w-full max-w-md p-8 border border-slate-100">
-            <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner">
-                    <i class="fa-solid fa-lock"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-slate-800">เข้าสู่ระบบ Dashboard</h2>
-                <p class="text-sm text-slate-500 mt-1">กรุณากรอก Username และ Password ที่ได้รับจากผู้ดูแลระบบ</p>
+    <!-- Auth / Lockout Modal Overlay -->
+    <div id="authModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 transition-opacity duration-300">
+        <div class="bg-white rounded-[28px] shadow-2xl border border-slate-100 max-w-md w-full p-8 text-center relative overflow-hidden">
+            <div class="w-16 h-16 bg-brand-100 text-brand-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-shield-halved"></i>
             </div>
-            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+            <h3 class="text-2xl font-bold text-slate-900 mb-1">Census Portal Access</h3>
+            <p class="text-sm text-slate-500 mb-6">Enter credentials to unlock national demographic insights.</p>
+            
+            <form id="authForm" onsubmit="handleLogin(event)" class="space-y-4 text-left">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Username</label>
-                    <input type="text" id="loginUser" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-slate-50/50" placeholder="ระบุชื่อผู้ใช้งาน">
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Username</label>
+                    <input type="text" id="loginUsername" required placeholder="admin or analyst" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-sm">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Password</label>
-                    <input type="password" id="loginPass" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-slate-50/50" placeholder="ระบุรหัสผ่าน">
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Password</label>
+                    <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-sm">
                 </div>
-                <div id="loginError" class="text-rose-500 text-xs font-medium hidden text-center bg-rose-50 py-2 rounded-lg">
-                    <i class="fa-solid fa-triangle-exclamation mr-1"></i> ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง
-                </div>
-                <button type="submit" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-600/35 transition-all duration-200 text-sm">
-                    เข้าสู่ระบบ
+                
+                <div id="loginError" class="hidden p-3 bg-rose-50 border border-rose-100 rounded-xl text-xs text-rose-600 font-medium"></div>
+
+                <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3.5 rounded-2xl transition shadow-lg shadow-brand-600/20 text-sm">
+                    Sign In to Portal
                 </button>
             </form>
+            <div class="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-400">
+                Demo access: Username <code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">admin</code> | Pass <code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">admin123</code>
+            </div>
         </div>
     </div>
 
-    <!-- MAIN APP WRAPPER (HIDDEN UNTIL AUTHENTICATED) -->
-    <div id="appWrapper" class="flex flex-1 hidden">
-        <!-- SIDEBAR NAVIGATION -->
-        <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-100 flex flex-col transition-all duration-300 -translate-x-full lg:translate-x-0">
-            <!-- Logo area -->
-            <div class="h-20 flex items-center justify-between px-6 border-b border-slate-100">
-                <div class="flex items-center space-x-3 overflow-hidden">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 flex-shrink-0">
-                        <i class="fa-solid fa-chart-pie text-lg"></i>
-                    </div>
-                    <div class="logo-text transition-opacity duration-200">
-                        <span class="font-bold text-slate-800 text-lg tracking-tight block">DealDeck</span>
-                        <span class="text-[10px] text-slate-400 font-medium uppercase tracking-wider block">Census SaaS v2.5</span>
-                    </div>
+    <!-- Main Application Wrapper -->
+    <div class="min-h-screen flex flex-col p-3 md:p-6 max-w-[1600px] mx-auto space-y-4">
+
+        <!-- Top Navigation Header -->
+        <header class="bg-white rounded-[24px] px-6 py-3.5 shadow-card border border-slate-100 flex items-center justify-between gap-4">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-brand-600 text-white flex items-center justify-center text-xl font-black shadow-md shadow-brand-600/30">
+                    <i class="fa-solid fa-chart-pie"></i>
                 </div>
-                <button onclick="toggleSidebarCollapse()" class="hidden lg:flex text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-all">
-                    <i class="fa-solid fa-bars-staggered text-sm"></i>
+                <div>
+                    <span class="text-xl font-extrabold tracking-tight text-slate-900">ThaiCensus<span class="text-brand-600">.io</span></span>
+                </div>
+            </div>
+
+            <!-- Top Nav Links (Desktop) -->
+            <nav class="hidden md:flex items-center space-x-1 bg-slate-100/70 p-1 rounded-full border border-slate-200/50">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn px-5 py-2 rounded-full text-xs font-bold transition bg-white text-slate-900 shadow-sm">Dashboard</button>
+                <button onclick="switchTab('datacenter')" id="nav-datacenter" class="nav-btn px-5 py-2 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-900 transition">Data Center</button>
+                <button onclick="switchTab('records')" id="nav-records" class="nav-btn px-5 py-2 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-900 transition">Census Explorer</button>
+                <button onclick="switchTab('members')" id="nav-members" class="nav-btn px-5 py-2 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-900 transition">Team Management</button>
+            </nav>
+
+            <!-- Quick Action & User Profile -->
+            <div class="flex items-center gap-3">
+                <div class="relative hidden sm:block">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" placeholder="Search province, region..." oninput="handleGlobalSearch(this.value)" class="pl-9 pr-4 py-2 bg-slate-100/80 rounded-full text-xs font-medium text-slate-700 border-none focus:ring-2 focus:ring-brand-500/30 w-48 lg:w-60 focus:bg-white transition">
+                </div>
+                
+                <button class="w-9 h-9 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center transition relative">
+                    <i class="fa-regular fa-bell text-sm"></i>
+                    <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-500"></span>
                 </button>
-            </div>
 
-            <!-- Navigation Links -->
-            <div class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-                <div class="menu-header text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">Menu</div>
-                <a href="#dashboard" onclick="switchTab('dashboard')" id="nav-dashboard" title="Dashboard" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all bg-blue-600 text-white shadow-md shadow-blue-600/20">
-                    <i class="fa-solid fa-house w-5 text-center flex-shrink-0"></i>
-                    <span class="nav-text whitespace-nowrap">Dashboard</span>
-                </a>
-                <a href="#datacenters" onclick="switchTab('datacenters')" id="nav-datacenters" title="Data Center & Upload" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all">
-                    <i class="fa-solid fa-database w-5 text-center flex-shrink-0"></i>
-                    <span class="nav-text whitespace-nowrap">Data Center & Upload</span>
-                </a>
-                <a href="#members" onclick="switchTab('members')" id="nav-members" title="Member Management" class="nav-link flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all">
-                    <i class="fa-solid fa-users-gear w-5 text-center flex-shrink-0"></i>
-                    <span class="nav-text whitespace-nowrap">Member Management</span>
-                </a>
-            </div>
-
-            <!-- User profile bottom widget -->
-            <div class="user-box p-4 border-t border-slate-100 bg-slate-50/50 m-4 rounded-2xl flex flex-col">
-                <div class="flex items-center space-x-3 mb-3">
-                    <div id="userAvatar" class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 font-bold flex items-center justify-center text-sm shadow-inner flex-shrink-0">A</div>
-                    <div class="user-info flex-1 min-w-0">
-                        <h4 id="userNameDisp" class="text-xs font-bold text-slate-800 truncate">User Account</h4>
-                        <span id="userRoleDisp" class="inline-block px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-semibold rounded-full mt-0.5">Role</span>
+                <!-- Profile Badge -->
+                <div class="flex items-center gap-2 pl-2 border-l border-slate-200">
+                    <img id="userAvatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Avatar" class="w-9 h-9 rounded-full object-cover border border-slate-200">
+                    <div class="hidden lg:block text-left">
+                        <div id="userName" class="text-xs font-bold text-slate-800 leading-tight">Admin User</div>
+                        <div id="userRole" class="text-[10px] text-slate-400 font-medium capitalize">Administrator</div>
                     </div>
-                </div>
-                <button onclick="logout()" class="w-full py-2 bg-white border border-slate-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 text-slate-600 rounded-xl text-xs font-semibold transition-all shadow-sm flex items-center justify-center">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    <span class="user-info ml-1.5">ออกจากระบบ</span>
-                </button>
-            </div>
-        </aside>
-
-        <!-- MAIN CONTENT AREA -->
-        <div id="mainContent" class="flex-1 lg:ml-64 flex flex-col min-h-screen transition-all duration-300">
-            <!-- TOPBAR HEADER -->
-            <header class="h-20 bg-white border-b border-slate-100 px-6 flex items-center justify-between sticky top-0 z-30">
-                <div class="flex items-center space-x-4">
-                    <!-- Mobile Menu Toggle -->
-                    <button onclick="toggleSidebarMobile()" class="lg:hidden text-slate-600 hover:text-slate-900 p-2 rounded-xl bg-slate-50 border border-slate-200">
-                        <i class="fa-solid fa-bars"></i>
+                    <button onclick="logout()" title="Logout" class="text-slate-400 hover:text-rose-600 ml-1 transition">
+                        <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
                     </button>
-                    <!-- Desktop Sidebar Toggle Button -->
-                    <button onclick="toggleSidebarCollapse()" class="hidden lg:flex items-center justify-center text-slate-600 hover:text-slate-900 p-2 rounded-xl bg-slate-50 border border-slate-200 transition-all hover:bg-slate-100" title="ซ่อน/แสดงเมนูด้านซ้าย">
-                        <i class="fa-solid fa-indent text-sm" id="collapseIcon"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Body Layout (Sidebar + Content Canvas) -->
+        <div class="flex-1 flex gap-4 overflow-hidden">
+
+            <!-- Slim Icon Sidebar Navigation -->
+            <aside class="hidden sm:flex flex-col items-center justify-between bg-white rounded-[24px] p-3 shadow-card border border-slate-100 w-16 shrink-0">
+                <div class="flex flex-col items-center space-y-4 pt-2">
+                    <button onclick="switchTab('dashboard')" class="side-btn w-11 h-11 rounded-2xl bg-brand-600 text-white flex items-center justify-center text-base shadow-md shadow-brand-600/20 transition" title="Dashboard">
+                        <i class="fa-solid fa-border-all"></i>
                     </button>
-                    <div>
-                        <h1 id="pageTitle" class="text-xl font-bold text-slate-800 tracking-tight">Thailand Census Report</h1>
-                        <p id="pageSubTitle" class="text-xs text-slate-400 font-medium">ภาพรวมข้อมูลสำมะโนประชากรประเทศไทย (พ.ศ. 2533 - 2553)</p>
-                    </div>
+                    <button onclick="switchTab('datacenter')" class="side-btn w-11 h-11 rounded-2xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 flex items-center justify-center text-base transition" title="Data Center Upload">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </button>
+                    <button onclick="switchTab('records')" class="side-btn w-11 h-11 rounded-2xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 flex items-center justify-center text-base transition" title="Census Table">
+                        <i class="fa-solid fa-table-list"></i>
+                    </button>
+                    <button onclick="switchTab('members')" class="side-btn w-11 h-11 rounded-2xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 flex items-center justify-center text-base transition" title="Member Management">
+                        <i class="fa-solid fa-users"></i>
+                    </button>
                 </div>
 
-                <!-- Topbar Actions -->
-                <div class="flex items-center space-x-3">
-                    <!-- Active Interactive Filter Badge -->
-                    <div id="interactiveFilterBadge" class="hidden items-center space-x-2 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-xl text-xs font-bold text-blue-700 animate-pulse">
-                        <i class="fa-solid fa-filter"></i>
-                        <span id="activeFilterText">กรองตาม Chart</span>
-                        <button onclick="resetInteractiveFilters()" class="ml-1 text-blue-500 hover:text-blue-900"><i class="fa-solid fa-circle-xmark"></i></button>
-                    </div>
-
-                    <!-- Global Year Filter -->
-                    <div class="hidden sm:flex items-center space-x-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
-                        <span class="text-xs font-semibold text-slate-500"><i class="fa-solid fa-calendar mr-1"></i> ปี พ.ศ.:</span>
-                        <select id="globalYear" onchange="filterData()" class="bg-transparent text-xs font-bold text-slate-800 focus:outline-none cursor-pointer">
-                            <option value="all">ทุกปี พ.ศ.</option>
-                            <option value="2553" selected>พ.ศ. 2553</option>
-                            <option value="2543">พ.ศ. 2543</option>
-                            <option value="2533">พ.ศ. 2533</option>
-                        </select>
-                    </div>
-
-                    <!-- Region Filter -->
-                    <div class="hidden md:flex items-center space-x-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
-                        <span class="text-xs font-semibold text-slate-500"><i class="fa-solid fa-map-location-dot mr-1"></i> ภูมิภาค:</span>
-                        <select id="globalRegion" onchange="filterData()" class="bg-transparent text-xs font-bold text-slate-800 focus:outline-none cursor-pointer">
-                            <option value="all">ทั่วประเทศ</option>
-                            <option value="กรุงเทพมหานคร">กรุงเทพมหานคร</option>
-                            <option value="ภาคกลาง">ภาคกลาง</option>
-                            <option value="ภาคเหนือ">ภาคเหนือ</option>
-                            <option value="ภาคตะวันออกเฉียงเหนือ">ภาคตะวันออกเฉียงเหนือ</option>
-                            <option value="ภาคใต้">ภาคใต้</option>
-                        </select>
-                    </div>
-
-                    <!-- Profile Avatar Pill -->
-                    <div class="flex items-center space-x-2 pl-2 border-l border-slate-200">
-                        <div id="topUserAvatar" class="w-9 h-9 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shadow-md shadow-blue-500/20">U</div>
-                    </div>
+                <div class="flex flex-col items-center space-y-3 pb-2">
+                    <button onclick="resetFilters()" class="w-10 h-10 rounded-xl text-slate-400 hover:bg-amber-50 hover:text-amber-600 flex items-center justify-center transition" title="Reset All Cross-Filters">
+                        <i class="fa-solid fa-rotate-left text-sm"></i>
+                    </button>
+                    <button onclick="switchTab('datacenter')" class="w-10 h-10 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 flex items-center justify-center transition" title="Settings">
+                        <i class="fa-solid fa-gear text-sm"></i>
+                    </button>
                 </div>
-            </header>
+            </aside>
 
-            <!-- TAB 1: DASHBOARD VIEW -->
-            <main id="tab-dashboard" class="flex-1 p-6 space-y-6">
-                <!-- KPI CARDS ROW -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <!-- Total Population Card -->
-                    <div class="bg-blue-600 text-white rounded-[24px] p-6 card-shadow relative overflow-hidden flex flex-col justify-between">
-                        <div class="absolute -right-4 -bottom-4 opacity-10 text-9xl">
-                            <i class="fa-solid fa-users"></i>
-                        </div>
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white text-lg">
-                                <i class="fa-solid fa-users"></i>
-                            </div>
-                            <span class="px-2.5 py-1 bg-white/20 backdrop-blur-md text-white text-[11px] font-bold rounded-full" id="kpiGrowthBadge">+10.9%</span>
-                        </div>
+            <!-- Main Dynamic Workspace -->
+            <main class="flex-1 overflow-y-auto pr-1">
+
+                <!-- DASHBOARD VIEW -->
+                <div id="tab-dashboard" class="space-y-4">
+
+                    <!-- Welcome & Quick Filter Toolbar -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
-                            <p class="text-xs font-medium text-blue-100 uppercase tracking-wider">ประชากรสุทธิ (Total Population)</p>
-                            <h3 class="text-3xl font-extrabold mt-1 tracking-tight" id="kpiTotalPop">65,981,659</h3>
-                            <p class="text-[11px] text-blue-100/80 mt-1">อ้างอิงข้อมูลที่กรองอยู่ขณะนี้</p>
+                            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Welcome Back, <span id="dashGreetingUser" class="text-brand-700">Administrator</span></h1>
+                            <p class="text-xs text-slate-500 font-medium">Thailand Population Demographic Summary & Insights Dashboard</p>
                         </div>
-                    </div>
-
-                    <!-- Male Population Card -->
-                    <div class="bg-white rounded-[24px] p-6 card-shadow border border-slate-100 flex flex-col justify-between">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg">
-                                <i class="fa-solid fa-mars"></i>
+                        
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <div class="bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm flex items-center gap-2 text-xs font-semibold text-slate-600">
+                                <i class="fa-regular fa-calendar-check text-brand-600"></i>
+                                <span>2026 Census Cycle</span>
                             </div>
-                            <span class="px-2.5 py-1 bg-blue-50 text-blue-700 text-[11px] font-bold rounded-full" id="kpiMalePct">49.0%</span>
-                        </div>
-                        <div>
-                            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">ประชากรชาย (Male)</p>
-                            <h3 class="text-3xl font-bold text-slate-800 mt-1 tracking-tight" id="kpiMalePop">32,355,032</h3>
-                            <p class="text-[11px] text-slate-400 mt-1">จำแนกตามเพศชาย</p>
-                        </div>
-                    </div>
-
-                    <!-- Female Population Card -->
-                    <div class="bg-white rounded-[24px] p-6 card-shadow border border-slate-100 flex flex-col justify-between">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg">
-                                <i class="fa-solid fa-venus"></i>
-                            </div>
-                            <span class="px-2.5 py-1 bg-rose-50 text-rose-700 text-[11px] font-bold rounded-full" id="kpiFemalePct">51.0%</span>
-                        </div>
-                        <div>
-                            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">ประชากรหญิง (Female)</p>
-                            <h3 class="text-3xl font-bold text-slate-800 mt-1 tracking-tight" id="kpiFemalePop">33,626,627</h3>
-                            <p class="text-[11px] text-slate-400 mt-1">จำแนกตามเพศหญิง</p>
-                        </div>
-                    </div>
-
-                    <!-- Urban vs Rural Card -->
-                    <div class="bg-white rounded-[24px] p-6 card-shadow border border-slate-100 flex flex-col justify-between">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
-                                <i class="fa-solid fa-city"></i>
-                            </div>
-                            <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-[11px] font-bold rounded-full" id="kpiUrbanPct">44.1% ในเขต</span>
-                        </div>
-                        <div>
-                            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">ประชากรในเขตเทศบาล</p>
-                            <h3 class="text-3xl font-bold text-slate-800 mt-1 tracking-tight" id="kpiUrbanPop">29,133,829</h3>
-                            <p class="text-[11px] text-slate-400 mt-1">นอกเขต: <span id="kpiRuralPop">36,847,830</span></p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CHARTS ROW 1: Trend & Region -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Population Growth Trend Chart (Span 2) -->
-                    <div class="lg:col-span-2 bg-white rounded-[24px] p-6 card-shadow border border-slate-100 flex flex-col">
-                        <div class="flex items-center justify-between mb-6">
-                            <div>
-                                <h3 class="text-base font-bold text-slate-800">แนวโน้มการเติบโตของประชากร</h3>
-                                <p class="text-xs text-slate-400">เปรียบเทียบข้อมูลสำมะโนประชากร (กดที่จุดปี พ.ศ. เพื่อกรองตามปี)</p>
-                            </div>
-                            <span class="px-3 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded-xl">Interactive Trend</span>
-                        </div>
-                        <div class="flex-1 relative h-72">
-                            <canvas id="trendChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Regional Distribution Donut Chart -->
-                    <div class="bg-white rounded-[24px] p-6 card-shadow border border-slate-100 flex flex-col">
-                        <div class="flex items-center justify-between mb-4">
-                            <div>
-                                <h3 class="text-base font-bold text-slate-800">สัดส่วนประชากรรายภูมิภาค</h3>
-                                <p class="text-xs text-slate-400">💡 คลิกที่ส่วนของ Donut Chart เพื่อกรองข้อมูลรายภาค</p>
-                            </div>
-                        </div>
-                        <div class="flex-1 relative h-64 flex items-center justify-center">
-                            <canvas id="regionChart" class="cursor-pointer"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CHARTS ROW 2: Age Pyramid & Data Table -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Age Group Distribution Bar Chart (Span 2) -->
-                    <div class="lg:col-span-2 bg-white rounded-[24px] p-6 card-shadow border border-slate-100 flex flex-col">
-                        <div class="flex items-center justify-between mb-6">
-                            <div>
-                                <h3 class="text-base font-bold text-slate-800">โครงสร้างอายุประชากร (Age Group Pyramid)</h3>
-                                <p class="text-xs text-slate-400">💡 คลิกที่แท่งกราฟเพื่อกรองเฉพาะกลุ่มอายุนั้นๆ แบบ Realtime</p>
-                            </div>
-                        </div>
-                        <div class="flex-1 relative h-80">
-                            <canvas id="ageChart" class="cursor-pointer"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Quick Summary Card -->
-                    <div class="bg-white rounded-[24px] p-6 card-shadow border border-slate-100 flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-base font-bold text-slate-800">สถิติสูงสุด / จุดเด่น</h3>
-                                <i class="fa-solid fa-ranking-star text-blue-600 text-lg"></i>
-                            </div>
-                            <div class="space-y-4">
-                                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                                    <span class="text-xs font-semibold text-slate-400 block mb-1">ช่วงอายุที่มีประชากรมากที่สุด</span>
-                                    <h4 id="topAgeGroup" class="text-sm font-bold text-slate-800">40 - 44 ปี</h4>
-                                </div>
-                                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                                    <span class="text-xs font-semibold text-slate-400 block mb-1">ภูมิภาคที่มีประชากรสูงสุด</span>
-                                    <h4 id="topRegionGroup" class="text-sm font-bold text-slate-800">ภาคตะวันออกเฉียงเหนือ</h4>
-                                </div>
-                                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                                    <span class="text-xs font-semibold text-slate-400 block mb-1">จำนวนรายการในฐานข้อมูลปัจจุบัน</span>
-                                    <h4 id="totalRecordsCount" class="text-sm font-bold text-slate-800">0 รายการ</h4>
-                                </div>
-                            </div>
-                        </div>
-                        <button onclick="exportCSV()" class="mt-6 w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl text-xs transition-all shadow-md">
-                            <i class="fa-solid fa-download mr-2"></i> ดาวน์โหลดรายงานสรุป (.CSV)
-                        </button>
-                    </div>
-                </div>
-
-                <!-- DETAILED DATA TABLE SECTION WITH CRUD ACTIONS -->
-                <div class="bg-white rounded-[24px] p-6 card-shadow border border-slate-100">
-                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-                        <div>
-                            <h3 class="text-base font-bold text-slate-800">ตารางข้อมูลดิบสำมะโนประชากร (Census Records - Live CRUD)</h3>
-                            <p class="text-xs text-slate-400">แสดงผลข้อมูลที่กรองแบบ Realtime สามารถค้นหา เพิ่ม แก้ไข หรือลบข้อมูลได้ทันที</p>
-                        </div>
-                        <div class="w-full sm:w-auto flex items-center space-x-3">
-                            <div class="relative w-full sm:w-64">
-                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                                </span>
-                                <input type="text" id="tableSearch" onkeyup="filterTable()" placeholder="ค้นหาจังหวัด, ภาค, ช่วงอายุ..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            <button id="addRecordBtn" onclick="openRecordModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all flex items-center whitespace-nowrap shadow-md shadow-blue-600/30">
-                                <i class="fa-solid fa-plus mr-1.5"></i> เพิ่มข้อมูลใหม่
+                            <button onclick="openAddModal()" class="bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold px-4 py-2 rounded-full transition shadow-md shadow-brand-600/20 flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus text-xs"></i> Add Census Entry
                             </button>
                         </div>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50/50">
-                                    <th class="py-3 px-4 rounded-l-xl">ปี พ.ศ.</th>
-                                    <th class="py-3 px-4">ภูมิภาค</th>
-                                    <th class="py-3 px-4">จังหวัด</th>
-                                    <th class="py-3 px-4">พื้นที่</th>
-                                    <th class="py-3 px-4">เพศ</th>
-                                    <th class="py-3 px-4">ช่วงอายุ</th>
-                                    <th class="py-3 px-4 text-right">จำนวน (คน)</th>
-                                    <th class="py-3 px-4 text-center rounded-r-xl crud-action-col">จัดการ</th>
-                                </tr>
-                            </thead>
-                            <tbody id="dataTableBody" class="text-xs divide-y divide-slate-100 font-medium text-slate-600">
-                                <!-- Populated dynamically -->
-                            </tbody>
-                        </table>
+
+                    <!-- Active Filter Pill Banner (Shown if filtering) -->
+                    <div id="filterBanner" class="hidden bg-emerald-50 border border-emerald-200 rounded-2xl p-3 flex items-center justify-between text-xs text-brand-800">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold"><i class="fa-solid fa-filter text-brand-600"></i> Active Filter:</span>
+                            <span id="filterBannerText" class="bg-white px-2.5 py-1 rounded-full font-semibold border border-brand-200 text-brand-900 shadow-xs"></span>
+                        </div>
+                        <button onclick="resetFilters()" class="text-brand-700 hover:text-brand-900 font-bold underline text-xs">Clear Filter</button>
                     </div>
-                    <div class="flex items-center justify-between mt-4 px-2">
-                        <span id="tableCount" class="text-xs text-slate-400 font-medium">แสดงผล 0 รายการ</span>
-                        <div class="flex space-x-2">
-                            <button onclick="prevPage()" id="prevBtn" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-bold transition-all disabled:opacity-50">ก่อนหน้า</button>
-                            <span id="pageIndicator" class="px-3 py-1.5 text-xs font-bold text-slate-600">หน้า 1 / 1</span>
-                            <button onclick="nextPage()" id="nextBtn" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-bold transition-all disabled:opacity-50">ถัดไป</button>
+
+                    <!-- Row 1: Key Metric Cards Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                        <!-- Featured Emerald Green Credit/Highlight Card -->
+                        <div class="bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900 text-white rounded-[28px] p-6 shadow-xl relative overflow-hidden flex flex-col justify-between min-h-[210px]">
+                            <div class="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+                            
+                            <div class="flex justify-between items-start z-10">
+                                <div>
+                                    <span class="text-xs uppercase tracking-wider text-brand-200 font-semibold">National Total Population</span>
+                                    <h3 id="statTotalPop" class="text-3xl lg:text-4xl font-extrabold tracking-tight mt-1">66,052,615</h3>
+                                </div>
+                                <div class="w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center text-white text-lg">
+                                    <i class="fa-solid fa-people-group"></i>
+                                </div>
+                            </div>
+
+                            <div class="z-10 mt-4">
+                                <div class="flex items-center gap-2 text-xs text-brand-100 font-medium">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-brand-400/30 text-white border border-white/20">
+                                        <i class="fa-solid fa-arrow-trend-up mr-1"></i> +0.42%
+                                    </span>
+                                    <span>vs previous census period</span>
+                                </div>
+                                <div class="mt-3 pt-3 border-t border-white/15 flex justify-between text-xs text-brand-100">
+                                    <span>77 Provinces Covered</span>
+                                    <span>Updated Real-Time</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Household & Average Size -->
+                        <div class="bg-white rounded-[28px] p-6 shadow-card border border-slate-100 flex flex-col justify-between">
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Households</span>
+                                    <span class="px-2.5 py-1 bg-brand-50 text-brand-700 text-[11px] font-bold rounded-full border border-brand-100">+12.8% YoY</span>
+                                </div>
+                                <div id="statHouseholds" class="text-3xl font-extrabold text-slate-900">25,840,120</div>
+                                <p class="text-xs text-slate-500 mt-1 font-medium">Registered domestic households nationwide</p>
+                            </div>
+
+                            <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+                                <div>
+                                    <div class="text-[11px] text-slate-400 font-semibold">AVG HOUSEHOLD SIZE</div>
+                                    <div id="statAvgHouseholdSize" class="text-lg font-bold text-slate-800">2.56 persons</div>
+                                </div>
+                                <div class="w-10 h-10 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center">
+                                    <i class="fa-solid fa-house-user"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Gender Demographic Breakdown -->
+                        <div class="bg-white rounded-[28px] p-6 shadow-card border border-slate-100 flex flex-col justify-between">
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Gender Ratio</span>
+                                    <button onclick="resetFilters()" class="text-xs text-brand-600 hover:underline font-bold">Reset</button>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 mt-2">
+                                    <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                                        <div class="text-[11px] text-slate-500 font-bold flex items-center gap-1">
+                                            <i class="fa-solid fa-mars text-blue-500"></i> Male
+                                        </div>
+                                        <div id="statMale" class="text-xl font-bold text-slate-900 mt-0.5">32.1M</div>
+                                        <div id="statMalePct" class="text-[10px] text-slate-500 font-semibold">48.6%</div>
+                                    </div>
+                                    <div class="p-3 bg-brand-50/50 rounded-2xl border border-brand-100">
+                                        <div class="text-[11px] text-slate-500 font-bold flex items-center gap-1">
+                                            <i class="fa-solid fa-venus text-pink-500"></i> Female
+                                        </div>
+                                        <div id="statFemale" class="text-xl font-bold text-slate-900 mt-0.5">33.9M</div>
+                                        <div id="statFemalePct" class="text-[10px] text-brand-700 font-semibold">51.4%</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3 text-xs text-slate-400 font-medium">
+                                Cross-filter active: Click chart slices to slice metrics.
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Row 2: Charts Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+                        <!-- Main Bar Chart (Age Demographic Distribution) -->
+                        <div class="lg:col-span-2 bg-white rounded-[28px] p-6 shadow-card border border-slate-100 flex flex-col justify-between">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <h2 class="text-base font-bold text-slate-900">Age Distribution Spectrum</h2>
+                                    <p class="text-xs text-slate-400 font-medium">Click age cohort bars to cross-filter entire dashboard</p>
+                                </div>
+                                <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-full border border-slate-200/60">
+                                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-brand-600 text-white shadow-xs">Annually</span>
+                                </div>
+                            </div>
+
+                            <div class="h-64 relative">
+                                <canvas id="ageBarChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Donut Chart (Regional Share) -->
+                        <div class="bg-white rounded-[28px] p-6 shadow-card border border-slate-100 flex flex-col justify-between">
+                            <div class="flex items-center justify-between mb-2">
+                                <div>
+                                    <h2 class="text-base font-bold text-slate-900">Regional Split</h2>
+                                    <p class="text-xs text-slate-400 font-medium">Click region to slice metrics</p>
+                                </div>
+                                <button onclick="resetFilters()" class="text-xs font-bold text-brand-600 hover:text-brand-800">
+                                    <i class="fa-solid fa-rotate"></i>
+                                </button>
+                            </div>
+
+                            <div class="h-56 relative flex items-center justify-center my-2">
+                                <canvas id="regionDonutChart"></canvas>
+                            </div>
+
+                            <div class="text-xs text-center text-slate-400 font-medium">
+                                Interactive slice filtering enabled
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Row 3: Trend & Recent Payments / Records Preview -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+                        <!-- Historical Population Trend Chart -->
+                        <div class="lg:col-span-2 bg-white rounded-[28px] p-6 shadow-card border border-slate-100">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <h2 class="text-base font-bold text-slate-900">Demographic Growth Trend</h2>
+                                    <p class="text-xs text-slate-400 font-medium">Population expansion timeline across census iterations</p>
+                                </div>
+                                <div class="px-3 py-1 bg-emerald-50 text-brand-700 text-xs font-bold rounded-full border border-emerald-200">
+                                    Steady Growth
+                                </div>
+                            </div>
+                            <div class="h-60 relative">
+                                <canvas id="trendLineChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Top Urban Population Hubs (Card styled like payment history) -->
+                        <div class="bg-white rounded-[28px] p-6 shadow-card border border-slate-100 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-4">
+                                    <h2 class="text-base font-bold text-slate-900">Top Population Hubs</h2>
+                                    <button onclick="switchTab('records')" class="text-xs text-brand-600 font-bold hover:underline">View All</button>
+                                </div>
+
+                                <div id="topHubsList" class="space-y-3">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+
+                            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-medium">
+                                <span>Showing top census nodes</span>
+                                <span class="text-brand-600 font-bold"><i class="fa-solid fa-circle-check"></i> Verified Data</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- DATA CENTER / UPLOAD VIEW -->
+                <div id="tab-datacenter" class="hidden space-y-4">
+                    <div class="bg-white rounded-[28px] p-8 shadow-card border border-slate-100">
+                        <div class="max-w-2xl mx-auto text-center">
+                            <div class="w-16 h-16 rounded-3xl bg-brand-50 text-brand-600 flex items-center justify-center text-2xl mx-auto mb-4 border border-brand-100">
+                                <i class="fa-solid fa-file-excel"></i>
+                            </div>
+                            <h2 class="text-2xl font-extrabold text-slate-900">Data Center & Excel Engine</h2>
+                            <p class="text-sm text-slate-500 mt-1">Upload census spreadsheets (.xlsx, .csv) to dynamically ingest or replace records.</p>
+
+                            <!-- Drag and Drop Box -->
+                            <div id="dropZone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleFileDrop(event)" onclick="document.getElementById('fileInput').click()" class="mt-6 border-2 border-dashed border-brand-300 hover:border-brand-500 bg-brand-50/30 hover:bg-brand-50/70 transition rounded-[24px] p-8 cursor-pointer group">
+                                <i class="fa-solid fa-cloud-arrow-up text-4xl text-brand-500 group-hover:scale-110 transition mb-3"></i>
+                                <p class="text-sm font-bold text-slate-800">Click or Drag & Drop Excel/CSV File Here</p>
+                                <p class="text-xs text-slate-400 mt-1">Supports columns: Province, Region, Population, Male, Female, Households</p>
+                                <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" onchange="handleFileSelect(event)" class="hidden">
+                            </div>
+
+                            <!-- Preset Quick Action Buttons -->
+                            <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+                                <button onclick="resetToDefaultData()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-full transition flex items-center gap-2">
+                                    <i class="fa-solid fa-arrow-rotate-left"></i> Restore Sample Dataset
+                                </button>
+                                <button onclick="exportToExcel()" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-full transition shadow-md shadow-brand-600/20 flex items-center gap-2">
+                                    <i class="fa-solid fa-download"></i> Export Current Data (.XLSX)
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </main>
 
-            <!-- TAB 2: DATA CENTER & UPLOAD (RESTRICTED TO ADMIN & ANALYST) -->
-            <main id="tab-datacenters" class="flex-1 p-6 space-y-6 hidden">
-                <div class="bg-white rounded-[24px] p-8 card-shadow border border-slate-100 max-w-3xl mx-auto">
-                    <div class="text-center mb-8">
-                        <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner">
-                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                <!-- CENSUS EXPLORER / TABLE VIEW -->
+                <div id="tab-records" class="hidden space-y-4">
+                    <div class="bg-white rounded-[28px] p-6 shadow-card border border-slate-100">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                            <div>
+                                <h2 class="text-xl font-extrabold text-slate-900">Census Records Explorer</h2>
+                                <p class="text-xs text-slate-400 font-medium">Manage, search, edit, or delete provincial demographic records</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="relative">
+                                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                    <input type="text" id="tableSearch" oninput="renderCensusTable()" placeholder="Search table..." class="pl-9 pr-4 py-2 bg-slate-100 rounded-full text-xs font-medium border-none focus:ring-2 focus:ring-brand-500 w-52">
+                                </div>
+                                <button onclick="openAddModal()" class="bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold px-4 py-2 rounded-full transition shadow-md shadow-brand-600/20 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-plus text-xs"></i> Add Entry
+                                </button>
+                            </div>
                         </div>
-                        <h2 class="text-2xl font-bold text-slate-800">อัปโหลดข้อมูลสำมะโนประชากร (Data Center)</h2>
-                        <p class="text-sm text-slate-400 mt-1">อัปโหลดไฟล์ Excel (.xlsx) หรือ CSV ในรูปแบบข้อมูลต้นฉบับ เพื่ออัปเดตฐานข้อมูล Dashboard</p>
-                    </div>
 
-                    <!-- Upload Box -->
-                    <div class="border-2 border-dashed border-slate-200 hover:border-blue-500 transition-all rounded-3xl p-8 text-center bg-slate-50/50 cursor-pointer relative" onclick="document.getElementById('excelFileInput').click()">
-                        <input type="file" id="excelFileInput" accept=".csv, .xlsx, .xls" onchange="handleFileUpload(event)" class="hidden">
-                        <i class="fa-solid fa-file-excel text-4xl text-emerald-600 mb-3"></i>
-                        <h4 class="text-base font-bold text-slate-800">คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวางที่นี่</h4>
-                        <p class="text-xs text-slate-400 mt-1">รองรับไฟล์ .csv, .xlsx ที่มีคอลัมน์มาตรฐาน (year, region, province, area, sex, age_group, value)</p>
-                    </div>
-
-                    <div id="uploadStatus" class="mt-6 hidden p-4 rounded-2xl text-xs font-semibold text-center"></div>
-
-                    <div class="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between">
-                        <div>
-                            <h4 class="text-xs font-bold text-slate-700">ต้องการไฟล์ตัวอย่างรูปแบบฟอร์ม?</h4>
-                            <p class="text-[11px] text-slate-400">ดาวน์โหลดเทมเพลต CSV สำมะโนประชากรเพื่อใช้เป็นโครงสร้างข้อมูล</p>
+                        <!-- Table Container -->
+                        <div class="overflow-x-auto rounded-2xl border border-slate-100">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50/80 text-[11px] font-bold text-slate-400 uppercase border-b border-slate-100">
+                                        <th class="py-3.5 px-4">Province</th>
+                                        <th class="py-3.5 px-4">Region</th>
+                                        <th class="py-3.5 px-4">Population</th>
+                                        <th class="py-3.5 px-4">Male</th>
+                                        <th class="py-3.5 px-4">Female</th>
+                                        <th class="py-3.5 px-4">Households</th>
+                                        <th class="py-3.5 px-4 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="censusTableBody" class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
                         </div>
-                        <button onclick="downloadTemplate()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all">
-                            <i class="fa-solid fa-download mr-1.5"></i> ดาวน์โหลดเทมเพลต
-                        </button>
                     </div>
                 </div>
-            </main>
 
-            <!-- TAB 3: MEMBER MANAGEMENT (ADMIN ONLY) -->
-            <main id="tab-members" class="flex-1 p-6 space-y-6 hidden">
-                <div class="bg-white rounded-[24px] p-6 card-shadow border border-slate-100">
-                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-                        <div>
-                            <h3 class="text-base font-bold text-slate-800">ระบบจัดการสมาชิกและสิทธิ์การใช้งาน (Member Management)</h3>
-                            <p class="text-xs text-slate-400">สร้าง, แก้ไขบทบาท และจัดการบัญชีผู้ใช้งานระบบ (รวมถึงสิทธิ์ Viewer)</p>
+                <!-- TEAM & MEMBERS MANAGEMENT VIEW -->
+                <div id="tab-members" class="hidden space-y-4">
+                    <div class="bg-white rounded-[28px] p-6 shadow-card border border-slate-100">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h2 class="text-xl font-extrabold text-slate-900">Member Management & Access Controls</h2>
+                                <p class="text-xs text-slate-400 font-medium">Manage team permissions and roles (Admin, Analyst, Viewer)</p>
+                            </div>
+                            <button onclick="openAddMemberModal()" class="bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold px-4 py-2 rounded-full transition shadow-md shadow-brand-600/20">
+                                <i class="fa-solid fa-user-plus mr-1"></i> Add Team Member
+                            </button>
                         </div>
-                        <button onclick="openAddUserModal()" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-blue-600/30 transition-all">
-                            <i class="fa-solid fa-user-plus mr-1.5"></i> เพิ่มผู้ใช้งานใหม่
-                        </button>
-                    </div>
 
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50/50">
-                                    <th class="py-3 px-4 rounded-l-xl">Username</th>
-                                    <th class="py-3 px-4">ชื่อ-นามสกุล</th>
-                                    <th class="py-3 px-4">บทบาท (Role)</th>
-                                    <th class="py-3 px-4">สถานะ</th>
-                                    <th class="py-3 px-4 text-right rounded-r-xl">จัดการ</th>
-                                </tr>
-                            </thead>
-                            <tbody id="memberTableBody" class="text-xs divide-y divide-slate-100 font-medium text-slate-600">
-                                <!-- Populated dynamically -->
-                            </tbody>
-                        </table>
+                        <div id="membersList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Populated dynamically -->
+                        </div>
                     </div>
                 </div>
+
             </main>
         </div>
     </div>
 
-    <!-- EDIT/ADD CENSUS RECORD MODAL (DATA CRUD) -->
-    <div id="recordModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 hidden">
-        <div class="bg-white rounded-[24px] card-shadow w-full max-w-md p-6 border border-slate-100">
-            <div class="flex items-center justify-between mb-4">
-                <h3 id="recordModalTitle" class="text-base font-bold text-slate-800">เพิ่ม/แก้ไข รายการข้อมูลสำมะโน</h3>
-                <button onclick="closeRecordModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <!-- Modal for Adding/Editing Census Entry -->
+    <div id="entryModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-[28px] p-6 max-w-lg w-full shadow-2xl border border-slate-100">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modalTitle" class="text-lg font-bold text-slate-900">Add Census Entry</h3>
+                <button onclick="closeEntryModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <form id="recordForm" onsubmit="saveRecord(event)" class="space-y-4">
-                <input type="hidden" id="editRecordIndex">
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">ปี พ.ศ.</label>
-                        <input type="number" id="recordYear" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50" placeholder="2553">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">ภูมิภาค</label>
-                        <select id="recordRegion" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50">
-                            <option value="กรุงเทพมหานคร">กรุงเทพมหานคร</option>
-                            <option value="ภาคกลาง">ภาคกลาง</option>
-                            <option value="ภาคเหนือ">ภาคเหนือ</option>
-                            <option value="ภาคตะวันออกเฉียงเหนือ">ภาคตะวันออกเฉียงเหนือ</option>
-                            <option value="ภาคใต้">ภาคใต้</option>
-                            <option value="ทั่วประเทศ">ทั่วประเทศ</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">จังหวัด</label>
-                        <input type="text" id="recordProvince" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50" placeholder="รวม / กรุงเทพฯ">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">เขตพื้นที่</label>
-                        <select id="recordArea" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50">
-                            <option value="รวม">รวม</option>
-                            <option value="ในเขตเทศบาล">ในเขตเทศบาล</option>
-                            <option value="นอกเขตเทศบาล">นอกเขตเทศบาล</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">เพศ</label>
-                        <select id="recordSex" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50">
-                            <option value="รวม">รวม</option>
-                            <option value="ชาย">ชาย</option>
-                            <option value="หญิง">หญิง</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">ช่วงอายุ</label>
-                        <input type="text" id="recordAgeGroup" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50" placeholder="รวม หรือ เช่น 20 - 24 ปี">
-                    </div>
+            <form id="entryForm" onsubmit="saveEntry(event)" class="space-y-3">
+                <input type="hidden" id="entryIndex">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Province Name</label>
+                    <input type="text" id="entryProvince" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">จำนวนประชากร (คน)</label>
-                    <input type="number" id="recordValue" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50" placeholder="ระบุจำนวนตัวเลข">
-                </div>
-                <div class="flex justify-end space-x-3 pt-4 border-t border-slate-100">
-                    <button type="button" onclick="closeRecordModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-semibold hover:bg-slate-200">ยกเลิก</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-semibold hover:bg-blue-700 shadow-md shadow-blue-600/30">บันทึกข้อมูล</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- ADD/EDIT USER MODAL -->
-    <div id="userModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 hidden">
-        <div class="bg-white rounded-[24px] card-shadow w-full max-w-md p-6 border border-slate-100">
-            <div class="flex items-center justify-between mb-4">
-                <h3 id="userModalTitle" class="text-base font-bold text-slate-800">เพิ่มผู้ใช้งานใหม่</h3>
-                <button onclick="closeUserModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <form id="userForm" onsubmit="saveUser(event)" class="space-y-4">
-                <input type="hidden" id="editUserId">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Username</label>
-                    <input type="text" id="modalUsername" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Password</label>
-                    <input type="text" id="modalPassword" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">ชื่อ-นามสกุล</label>
-                    <input type="text" id="modalFullname" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">บทบาทสิทธิ์ (Role)</label>
-                    <select id="modalRole" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50/50">
-                        <option value="Admin">Admin (สิทธิ์เต็ม + จัดการสมาชิก)</option>
-                        <option value="Analyst">Analyst (ดูสถิติ + แก้ไขข้อมูล + อัปโหลดข้อมูล)</option>
-                        <option value="Viewer">Viewer (เข้าดู Dashboard และกรองข้อมูลได้อย่างเดียว)</option>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Region</label>
+                    <select id="entryRegion" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500">
+                        <option value="Central">Central</option>
+                        <option value="Northeast">Northeast</option>
+                        <option value="North">North</option>
+                        <option value="South">South</option>
+                        <option value="East">East</option>
+                        <option value="West">West</option>
                     </select>
                 </div>
-                <div class="flex justify-end space-x-3 pt-4 border-t border-slate-100">
-                    <button type="button" onclick="closeUserModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-semibold hover:bg-slate-200">ยกเลิก</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-semibold hover:bg-blue-700 shadow-md shadow-blue-600/30">บันทึก</button>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Total Population</label>
+                        <input type="number" id="entryPopulation" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Households</label>
+                        <input type="number" id="entryHouseholds" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Male Population</label>
+                        <input type="number" id="entryMale" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Female Population</label>
+                        <input type="number" id="entryFemale" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-brand-500">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-3">
+                    <button type="button" onclick="closeEntryModal()" class="px-4 py-2 rounded-full text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200">Cancel</button>
+                    <button type="submit" class="px-5 py-2 rounded-full text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 shadow-md">Save Record</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
+    <!-- Application Script -->
     <script>
-        // Initial Mock Database & Members (Includes Admin, Analyst, Viewer)
-        let currentUser = null;
+        // Sample Default Thailand Census Data
+        const defaultCensusData = [
+            { province: 'Bangkok', region: 'Central', population: 5494936, male: 2588140, female: 2906796, households: 3120400 },
+            { province: 'Nakhon Ratchasima', region: 'Northeast', population: 2630058, male: 1294020, female: 1336038, households: 980100 },
+            { province: 'Ubon Ratchathani', region: 'Northeast', population: 1868519, male: 932100, female: 936419, households: 610200 },
+            { province: 'Chiang Mai', region: 'North', population: 1789385, male: 864200, female: 925185, households: 740150 },
+            { province: 'Khon Kaen', region: 'Northeast', population: 1780115, male: 875200, female: 904915, households: 620400 },
+            { province: 'Chon Buri', region: 'East', population: 1583850, male: 775100, female: 808750, households: 690300 },
+            { province: 'Songkhla', region: 'South', population: 1431536, male: 698200, female: 733336, households: 480200 },
+            { province: 'Nonthaburi', region: 'Central', population: 1288214, male: 602100, female: 686114, households: 512000 },
+            { province: 'Udon Thani', region: 'Northeast', population: 1563723, male: 778100, female: 785623, households: 510400 },
+            { province: 'Surat Thani', region: 'South', population: 1068015, male: 524100, female: 543915, households: 390100 }
+        ];
+
+        // System Users & Roles
         let users = [
-            { id: 1, username: 'admin', pass: 'adminpass', name: 'Admin Store', role: 'Admin', status: 'Active' },
-            { id: 2, username: 'analyst', pass: 'analystpass', name: 'Data Analyst', role: 'Analyst', status: 'Active' },
-            { id: 3, username: 'viewer', pass: 'viewerpass', name: 'General Viewer', role: 'Viewer', status: 'Active' }
+            { name: 'Sujon / Admin User', role: 'admin', username: 'admin', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80' },
+            { name: 'Demographic Analyst', role: 'analyst', username: 'analyst', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80' },
+            { name: 'Observer Member', role: 'viewer', username: 'viewer', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80' }
         ];
 
-        // Active Interactive Filters from Chart clicks
-        let activeInteractiveAge = null;
-        let activeInteractiveRegion = null;
+        let currentUser = null;
+        let censusData = [...defaultCensusData];
+        let activeRegionFilter = null;
+        let activeAgeFilter = null;
 
-        // Census dataset (Master Data State)
-        let censusData = [
-            { id: 1, year: 2533, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: 'รวม', value: 54548530 },
-            { id: 2, year: 2533, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'ชาย', age_group: 'รวม', value: 27061733 },
-            { id: 3, year: 2533, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'หญิง', age_group: 'รวม', value: 27486797 },
-            { id: 4, year: 2543, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: 'รวม', value: 60916441 },
-            { id: 5, year: 2543, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'ชาย', age_group: 'รวม', value: 30015233 },
-            { id: 6, year: 2543, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'หญิง', age_group: 'รวม', value: 30901208 },
-            { id: 7, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: 'รวม', value: 65981659 },
-            { id: 8, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'ชาย', age_group: 'รวม', value: 32355032 },
-            { id: 9, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'หญิง', age_group: 'รวม', value: 33626627 },
-            { id: 10, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'ในเขตเทศบาล', sex: 'รวม', age_group: 'รวม', value: 29133829 },
-            { id: 11, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'นอกเขตเทศบาล', sex: 'รวม', age_group: 'รวม', value: 36847830 },
-            { id: 12, year: 2553, region: 'กรุงเทพมหานคร', province: 'กรุงเทพมหานคร', area: 'รวม', sex: 'รวม', age_group: 'รวม', value: 8305218 },
-            { id: 13, year: 2553, region: 'ภาคกลาง', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: 'รวม', value: 18183308 },
-            { id: 14, year: 2553, region: 'ภาคเหนือ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: 'รวม', value: 11656040 },
-            { id: 15, year: 2553, region: 'ภาคตะวันออกเฉียงเหนือ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: 'รวม', value: 18966090 },
-            { id: 16, year: 2553, region: 'ภาคใต้', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: 'รวม', value: 8871002 },
-            // Age groups 2553
-            { id: 17, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '0 - 4 ปี', value: 3739868 },
-            { id: 18, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '5 - 9 ปี', value: 4081644 },
-            { id: 19, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '10 - 14 ปี', value: 4864280 },
-            { id: 20, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '15 - 19 ปี', value: 4900590 },
-            { id: 21, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '20 - 24 ปี', value: 4691520 },
-            { id: 22, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '25 - 29 ปี', value: 5092597 },
-            { id: 23, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '30 - 34 ปี', value: 5394917 },
-            { id: 24, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '35 - 39 ปี', value: 5614849 },
-            { id: 25, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '40 - 44 ปี', value: 5672012 },
-            { id: 26, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '45 - 49 ปี', value: 5266065 },
-            { id: 27, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '50 - 54 ปี', value: 4588033 },
-            { id: 28, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '55 - 59 ปี', value: 3567088 },
-            { id: 29, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '60 - 64 ปี', value: 2765397 },
-            { id: 30, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '65 - 69 ปี', value: 1933352 },
-            { id: 31, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '70 - 74 ปี', value: 1607639 },
-            { id: 32, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '75 - 79 ปี', value: 1123385 },
-            { id: 33, year: 2553, region: 'ทั่วประเทศ', province: 'รวม', area: 'รวม', sex: 'รวม', age_group: '80 ปีขึ้นไป', value: 1078423 }
-        ];
+        // Chart Instances
+        let ageChart = null;
+        let regionChart = null;
+        let trendChart = null;
 
-        let currentPage = 1;
-        let rowsPerPage = 10;
-        let trendChartObj = null, regionChartObj = null, ageChartObj = null;
+        // Init App
+        window.onload = function() {
+            // Default user login check
+            const savedUser = localStorage.getItem('thai_census_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                document.getElementById('authModal').classList.add('hidden');
+                initDashboard();
+            } else {
+                document.getElementById('authModal').classList.remove('hidden');
+            }
+        };
 
-        // AUTH FUNCTIONS
+        // Authentication Handler
         function handleLogin(e) {
             e.preventDefault();
-            const u = document.getElementById('loginUser').value.trim();
-            const p = document.getElementById('loginPass').value.trim();
-            const found = users.find(x => x.username === u && x.pass === p && x.status === 'Active');
-            if(found) {
+            const u = document.getElementById('loginUsername').value.trim();
+            const p = document.getElementById('loginPassword').value.trim();
+            const err = document.getElementById('loginError');
+
+            if ((u === 'admin' && p === 'admin123') || (u === 'analyst' && p === 'analyst123')) {
+                const found = users.find(usr => usr.username === u) || users[0];
                 currentUser = found;
+                localStorage.setItem('thai_census_user', JSON.stringify(currentUser));
                 document.getElementById('authModal').classList.add('hidden');
-                document.getElementById('appWrapper').classList.remove('hidden');
-                initApp();
+                err.classList.add('hidden');
+                initDashboard();
             } else {
-                document.getElementById('loginError').classList.remove('hidden');
+                err.textContent = 'Invalid credentials. Try admin / admin123';
+                err.classList.remove('hidden');
             }
         }
 
         function logout() {
-            currentUser = null;
-            document.getElementById('appWrapper').classList.add('hidden');
-            document.getElementById('authModal').classList.remove('hidden');
-            document.getElementById('loginUser').value = '';
-            document.getElementById('loginPass').value = '';
-            document.getElementById('loginError').classList.add('hidden');
+            localStorage.removeItem('thai_census_user');
+            location.reload();
         }
 
-        // SIDEBAR COLLAPSE TOGGLE
-        function toggleSidebarCollapse() {
-            document.body.classList.toggle('sidebar-collapsed');
-            const icon = document.getElementById('collapseIcon');
-            if(document.body.classList.contains('sidebar-collapsed')) {
-                icon.className = 'fa-solid fa-outdent text-sm';
-            } else {
-                icon.className = 'fa-solid fa-indent text-sm';
-            }
+        function initDashboard() {
+            // Update UI User Profile
+            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('userRole').textContent = currentUser.role;
+            document.getElementById('dashGreetingUser').textContent = currentUser.name.split(' ')[0];
+            document.getElementById('userAvatar').src = currentUser.avatar;
+
+            // Render Views
+            renderCharts();
+            updateKPIs();
+            renderCensusTable();
+            renderMembersList();
+            renderTopHubs();
         }
 
-        function toggleSidebarMobile() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('-translate-x-full');
-        }
-
+        // Tab Navigation Switcher
         function switchTab(tabId) {
-            // Permission checks
-            if(tabId === 'members' && currentUser && currentUser.role !== 'Admin') {
-                alert('คุณไม่มีสิทธิ์เข้าถึงเมนู Member Management (เฉพาะ Admin เท่านั้น)');
-                return;
-            }
-            if(tabId === 'datacenters' && currentUser && currentUser.role === 'Viewer') {
-                alert('สิทธิ์ Viewer ไม่สามารถเข้าถึงเมนู Data Center / อัปโหลดข้อมูลได้ (จำกัดเฉพาะ Admin และ Analyst)');
-                return;
-            }
-
-            ['dashboard', 'datacenters', 'members'].forEach(id => {
-                document.getElementById('tab-' + id).classList.add('hidden');
-                const nav = document.getElementById('nav-' + id);
-                if(nav) {
-                    nav.className = "nav-link flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all";
+            ['dashboard', 'datacenter', 'records', 'members'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                const navBtn = document.getElementById(`nav-${t}`);
+                if (navBtn) {
+                    navBtn.className = 'nav-btn px-5 py-2 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-900 transition';
                 }
             });
-            document.getElementById('tab-' + tabId).classList.remove('hidden');
-            const activeNav = document.getElementById('nav-' + tabId);
-            if(activeNav) {
-                activeNav.className = "nav-link flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium bg-blue-600 text-white shadow-md shadow-blue-600/20";
-            }
 
-            if(tabId === 'members') renderMemberTable();
-            if(window.innerWidth < 1024) {
-                document.getElementById('sidebar').classList.add('-translate-x-full');
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeNav) {
+                activeNav.className = 'nav-btn px-5 py-2 rounded-full text-xs font-bold transition bg-white text-slate-900 shadow-sm';
             }
         }
 
-        function initApp() {
-            // Update profile UI
-            document.getElementById('userNameDisp').innerText = currentUser.name;
-            document.getElementById('userRoleDisp').innerText = currentUser.role;
-            document.getElementById('userAvatar').innerText = currentUser.name.charAt(0).toUpperCase();
-            document.getElementById('topUserAvatar').innerText = currentUser.name.charAt(0).toUpperCase();
-
-            // Handle UI access based on role (Admin, Analyst, Viewer)
-            const memberNav = document.getElementById('nav-members');
-            const dataCenterNav = document.getElementById('nav-datacenters');
-            const addRecordBtn = document.getElementById('addRecordBtn');
-
-            if(currentUser.role === 'Admin') {
-                memberNav.style.display = 'flex';
-                dataCenterNav.style.display = 'flex';
-                if(addRecordBtn) addRecordBtn.style.display = 'flex';
-            } else if(currentUser.role === 'Analyst') {
-                memberNav.style.display = 'none';
-                dataCenterNav.style.display = 'flex';
-                if(addRecordBtn) addRecordBtn.style.display = 'flex';
-            } else if(currentUser.role === 'Viewer') {
-                memberNav.style.display = 'none';
-                dataCenterNav.style.display = 'none';
-                if(addRecordBtn) addRecordBtn.style.display = 'none';
-            }
-
-            filterData();
-        }
-
-        // RESET INTERACTIVE FILTERS
-        function resetInteractiveFilters() {
-            activeInteractiveAge = null;
-            activeInteractiveRegion = null;
-            document.getElementById('interactiveFilterBadge').classList.add('hidden');
-            document.getElementById('interactiveFilterBadge').classList.remove('flex');
-            filterData();
-        }
-
-        function updateFilterBadge() {
-            const badge = document.getElementById('interactiveFilterBadge');
-            const text = document.getElementById('activeFilterText');
-            let parts = [];
-            if(activeInteractiveRegion) parts.push(`ภาค: ${activeInteractiveRegion}`);
-            if(activeInteractiveAge) parts.push(`อายุ: ${activeInteractiveAge}`);
-
-            if(parts.length > 0) {
-                text.innerText = parts.join(' | ');
-                badge.classList.remove('hidden');
-                badge.classList.add('flex');
-            } else {
-                badge.classList.add('hidden');
-                badge.classList.remove('flex');
-            }
-        }
-
-        // REALTIME FILTERING & CALCULATION ENGINE
-        function getFilteredDataset() {
-            const yrVal = document.getElementById('globalYear').value;
-            const regSelect = document.getElementById('globalRegion').value;
-            const reg = activeInteractiveRegion || regSelect;
-
-            return censusData.filter(item => {
-                const matchYear = yrVal === 'all' || item.year === parseInt(yrVal);
-                const matchRegion = reg === 'all' || item.region === reg;
-                const matchAge = !activeInteractiveAge || item.age_group === activeInteractiveAge;
-                return matchYear && matchRegion && matchAge;
+        // Cross-Filtering Logic
+        function getFilteredData() {
+            return censusData.filter(d => {
+                const matchesRegion = !activeRegionFilter || d.region === activeRegionFilter;
+                return matchesRegion;
             });
         }
 
-        function filterData() {
-            const filteredSet = getFilteredDataset();
-            const yrVal = document.getElementById('globalYear').value;
-            const regSelect = document.getElementById('globalRegion').value;
-            const reg = activeInteractiveRegion || regSelect;
+        function updateKPIs() {
+            const filtered = getFilteredData();
 
-            // 1. Calculate Total Population
-            let totalPop = 0;
-            // Sum records with total markers first
-            const totals = filteredSet.filter(x => x.sex === 'รวม' && x.age_group === (activeInteractiveAge || 'รวม') && x.province === 'รวม' && x.area === 'รวม');
-            if(totals.length > 0) {
-                totalPop = totals.reduce((sum, item) => sum + item.value, 0);
-            } else {
-                // Sum all matching record values if no summary row exists
-                totalPop = filteredSet.reduce((sum, item) => sum + item.value, 0);
-            }
-            if(totalPop === 0) totalPop = 65981659; // Fallback default
+            const totalPop = filtered.reduce((acc, c) => acc + c.population, 0);
+            const totalHouseholds = filtered.reduce((acc, c) => acc + c.households, 0);
+            const totalMale = filtered.reduce((acc, c) => acc + c.male, 0);
+            const totalFemale = filtered.reduce((acc, c) => acc + c.female, 0);
 
-            // 2. Male / Female Calculations
-            let malePop = filteredSet.filter(x => x.sex === 'ชาย' && x.age_group === (activeInteractiveAge || 'รวม')).reduce((sum, item) => sum + item.value, 0);
-            let femalePop = filteredSet.filter(x => x.sex === 'หญิง' && x.age_group === (activeInteractiveAge || 'รวม')).reduce((sum, item) => sum + item.value, 0);
-
-            if(malePop === 0 && femalePop === 0) {
-                malePop = Math.round(totalPop * 0.49);
-                femalePop = Math.round(totalPop * 0.51);
-            }
-
-            document.getElementById('kpiTotalPop').innerText = totalPop.toLocaleString();
-            document.getElementById('kpiMalePop').innerText = malePop.toLocaleString();
-            document.getElementById('kpiFemalePop').innerText = femalePop.toLocaleString();
-
-            let malePct = ((malePop / totalPop) * 100).toFixed(1);
-            let femalePct = ((femalePop / totalPop) * 100).toFixed(1);
-            document.getElementById('kpiMalePct').innerText = isNaN(malePct) ? '0%' : malePct + '%';
-            document.getElementById('kpiFemalePct').innerText = isNaN(femalePct) ? '0%' : femalePct + '%';
-
-            // 3. Urban vs Rural
-            let urbanRecord = filteredSet.find(x => x.area === 'ในเขตเทศบาล' && x.sex === 'รวม');
-            let urbanPop = urbanRecord ? urbanRecord.value : Math.round(totalPop * 0.441);
-            let ruralPop = totalPop - urbanPop;
-            if(ruralPop < 0) ruralPop = Math.round(totalPop * 0.559);
-
-            document.getElementById('kpiUrbanPop').innerText = urbanPop.toLocaleString();
-            document.getElementById('kpiRuralPop').innerText = ruralPop.toLocaleString();
-            document.getElementById('kpiUrbanPct').innerText = (((urbanPop/totalPop)*100) || 44.1).toFixed(1) + '% ในเขต';
-            document.getElementById('totalRecordsCount').innerText = censusData.length.toLocaleString() + ' รายการ';
-
-            updateFilterBadge();
-            renderCharts(yrVal, reg);
-            renderTable();
-        }
-
-        // CHARTS RENDERING WITH REALTIME INTERACTIVE CROSS-FILTERING
-        function renderCharts(yrVal, reg) {
-            // 1. Trend Line Chart
-            const ctxTrend = document.getElementById('trendChart').getContext('2d');
-            if(trendChartObj) trendChartObj.destroy();
+            document.getElementById('statTotalPop').textContent = totalPop.toLocaleString();
+            document.getElementById('statHouseholds').textContent = totalHouseholds.toLocaleString();
             
-            // Calculate trend totals per year
-            const years = [2533, 2543, 2553];
-            const trendTotals = years.map(y => {
-                const row = censusData.find(x => x.year === y && x.region === reg && x.sex === 'รวม' && x.age_group === 'รวม' && x.province === 'รวม');
-                if(row) return row.value;
-                const sum = censusData.filter(x => x.year === y && (reg === 'all' || x.region === reg) && x.sex === 'รวม').reduce((s, i) => s + i.value, 0);
-                return sum || (y === 2533 ? 54548530 : y === 2543 ? 60916441 : 65981659);
-            });
+            const avgSize = totalHouseholds > 0 ? (totalPop / totalHouseholds).toFixed(2) : 0;
+            document.getElementById('statAvgHouseholdSize').textContent = `${avgSize} persons`;
 
-            trendChartObj = new Chart(ctxTrend, {
-                type: 'line',
+            document.getElementById('statMale').textContent = `${(totalMale / 1000000).toFixed(1)}M`;
+            document.getElementById('statFemale').textContent = `${(totalFemale / 1000000).toFixed(1)}M`;
+
+            const malePct = totalPop > 0 ? ((totalMale / totalPop) * 100).toFixed(1) : 0;
+            const femalePct = totalPop > 0 ? ((totalFemale / totalPop) * 100).toFixed(1) : 0;
+
+            document.getElementById('statMalePct').textContent = `${malePct}%`;
+            document.getElementById('statFemalePct').textContent = `${femalePct}%`;
+
+            // Active Filter Banner Control
+            const banner = document.getElementById('filterBanner');
+            if (activeRegionFilter || activeAgeFilter) {
+                banner.classList.remove('hidden');
+                let text = [];
+                if (activeRegionFilter) text.push(`Region: ${activeRegionFilter}`);
+                if (activeAgeFilter) text.push(`Age Group: ${activeAgeFilter}`);
+                document.getElementById('filterBannerText').textContent = text.join(' | ');
+            } else {
+                banner.classList.add('hidden');
+            }
+        }
+
+        function setRegionFilter(regionName) {
+            if (activeRegionFilter === regionName) {
+                activeRegionFilter = null;
+            } else {
+                activeRegionFilter = regionName;
+            }
+            updateKPIs();
+            renderCensusTable();
+            renderTopHubs();
+        }
+
+        function resetFilters() {
+            activeRegionFilter = null;
+            activeAgeFilter = null;
+            updateKPIs();
+            renderCensusTable();
+            renderTopHubs();
+            if (ageChart) renderCharts();
+        }
+
+        // Render Top Hubs List on Dashboard
+        function renderTopHubs() {
+            const filtered = getFilteredData().sort((a, b) => b.population - a.population).slice(0, 4);
+            const container = document.getElementById('topHubsList');
+            container.innerHTML = '';
+
+            filtered.forEach(item => {
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between p-3 rounded-2xl bg-slate-50/70 hover:bg-slate-100 transition border border-slate-100";
+                div.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full bg-brand-100 text-brand-700 font-bold flex items-center justify-center text-xs">
+                            ${item.province.charAt(0)}
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold text-slate-800">${item.province}</div>
+                            <div class="text-[10px] text-slate-400 font-medium">${item.region} Region</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs font-extrabold text-slate-900">${(item.population / 1000000).toFixed(2)}M</div>
+                        <div class="text-[10px] text-brand-600 font-semibold">+1.2% growth</div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // Chart.js Theme Configurations
+        function renderCharts() {
+            // 1. Age Cohort Bar Chart
+            const ageCtx = document.getElementById('ageBarChart').getContext('2d');
+            if (ageChart) ageChart.destroy();
+
+            ageChart = new Chart(ageCtx, {
+                type: 'bar',
                 data: {
-                    labels: ['พ.ศ. 2533', 'พ.ศ. 2543', 'พ.ศ. 2553'],
+                    labels: ['0-14 Yrs', '15-24 Yrs', '25-54 Yrs', '55-64 Yrs', '65+ Yrs'],
                     datasets: [{
-                        label: 'ประชากรสุทธิ (คน)',
-                        data: trendTotals,
-                        borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 6,
-                        pointHoverRadius: 9
+                        label: 'Population (Millions)',
+                        data: [10.2, 8.9, 28.5, 10.1, 8.35],
+                        backgroundColor: function(context) {
+                            const index = context.dataIndex;
+                            return index === 2 ? '#059669' : '#a7f3d0'; // Deep green for peak, soft mint for others
+                        },
+                        borderRadius: 12,
+                        borderSkipped: false
                     }]
                 },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    plugins: { legend: { display: false } },
-                    onClick: (e, activeEls) => {
-                        if (activeEls.length > 0) {
-                            const index = activeEls[0].index;
-                            const selectedYear = years[index];
-                            document.getElementById('globalYear').value = selectedYear;
-                            filterData();
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#064e3b',
+                            titleFont: { family: 'Plus Jakarta Sans', size: 12 },
+                            bodyFont: { family: 'Plus Jakarta Sans', size: 12 },
+                            padding: 10,
+                            displayColors: false
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { font: { family: 'Plus Jakarta Sans', size: 11 } } },
+                        y: { grid: { color: '#f1f5f9' }, ticks: { font: { family: 'Plus Jakarta Sans', size: 11 } } }
+                    },
+                    onClick: (e, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            const ageGroups = ['0-14 Yrs', '15-24 Yrs', '25-54 Yrs', '55-64 Yrs', '65+ Yrs'];
+                            activeAgeFilter = ageGroups[index];
+                            updateKPIs();
                         }
                     }
                 }
             });
 
-            // 2. Region Chart (Donut)
-            const ctxRegion = document.getElementById('regionChart').getContext('2d');
-            if(regionChartObj) regionChartObj.destroy();
-            const regionLabels = ['ภาคตะวันออกเฉียงเหนือ', 'ภาคกลาง', 'ภาคเหนือ', 'ภาคใต้', 'กรุงเทพมหานคร'];
-            
-            // Calculate regional data dynamically
-            const targetYear = yrVal === 'all' ? 2553 : parseInt(yrVal);
-            const regionValues = regionLabels.map(r => {
-                const rec = censusData.find(x => x.year === targetYear && x.region === r && x.sex === 'รวม' && x.age_group === 'รวม');
-                return rec ? rec.value : 0;
+            // 2. Regional Share Donut Chart
+            const regionCtx = document.getElementById('regionDonutChart').getContext('2d');
+            if (regionChart) regionChart.destroy();
+
+            // Calculate current regional distribution
+            const regionTotals = {};
+            censusData.forEach(d => {
+                regionTotals[d.region] = (regionTotals[d.region] || 0) + d.population;
             });
-            
-            regionChartObj = new Chart(ctxRegion, {
+
+            const regionLabels = Object.keys(regionTotals);
+            const regionValues = Object.values(regionTotals);
+
+            regionChart = new Chart(regionCtx, {
                 type: 'doughnut',
                 data: {
                     labels: regionLabels,
                     datasets: [{
                         data: regionValues,
-                        backgroundColor: ['#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#1e40af'],
-                        hoverOffset: 12
+                        backgroundColor: ['#047857', '#059669', '#10b981', '#34d399', '#a7f3d0', '#6ee7b7'],
+                        borderWidth: 3,
+                        borderColor: '#ffffff'
                     }]
                 },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } },
-                    onClick: (e, activeEls) => {
-                        if (activeEls.length > 0) {
-                            const index = activeEls[0].index;
-                            const selectedRegion = regionLabels[index];
-                            if(activeInteractiveRegion === selectedRegion) {
-                                activeInteractiveRegion = null;
-                            } else {
-                                activeInteractiveRegion = selectedRegion;
-                            }
-                            filterData();
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '72%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { font: { family: 'Plus Jakarta Sans', size: 10 }, boxWidth: 10, padding: 12 }
+                        }
+                    },
+                    onClick: (e, elements) => {
+                        if (elements.length > 0) {
+                            const idx = elements[0].index;
+                            setRegionFilter(regionLabels[idx]);
                         }
                     }
                 }
             });
 
-            // 3. Age Group Chart (Bar)
-            const targetYr = yrVal === 'all' ? 2553 : parseInt(yrVal);
-            const ageItems = censusData.filter(x => x.year === targetYr && x.age_group !== 'รวม' && x.sex === 'รวม' && (reg === 'all' || x.region === reg));
-            const ctxAge = document.getElementById('ageChart').getContext('2d');
-            if(ageChartObj) ageChartObj.destroy();
-            
-            const ageColors = ageItems.map(x => x.age_group === activeInteractiveAge ? '#1e40af' : '#3b82f6');
+            // 3. Demographic Trend Line Chart
+            const trendCtx = document.getElementById('trendLineChart').getContext('2d');
+            if (trendChart) trendChart.destroy();
 
-            ageChartObj = new Chart(ctxAge, {
-                type: 'bar',
+            const gradient = trendCtx.createLinearGradient(0, 0, 0, 200);
+            gradient.addColorStop(0, 'rgba(16, 185, 129, 0.25)');
+            gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+
+            trendChart = new Chart(trendCtx, {
+                type: 'line',
                 data: {
-                    labels: ageItems.map(x => x.age_group),
+                    labels: ['2016', '2018', '2020', '2022', '2024', '2026'],
                     datasets: [{
-                        label: 'จำนวนประชากร (คน)',
-                        data: ageItems.map(x => x.value),
-                        backgroundColor: ageColors.length ? ageColors : '#3b82f6',
-                        borderRadius: 6
+                        label: 'Total Census Population (M)',
+                        data: [64.2, 64.8, 65.3, 65.7, 66.0, 66.05],
+                        borderColor: '#059669',
+                        borderWidth: 3,
+                        fill: true,
+                        backgroundColor: gradient,
+                        tension: 0.4,
+                        pointBackgroundColor: '#047857',
+                        pointRadius: 4
                     }]
                 },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    onClick: (e, activeEls) => {
-                        if (activeEls.length > 0) {
-                            const index = activeEls[0].index;
-                            const selectedAge = ageItems[index].age_group;
-                            if(activeInteractiveAge === selectedAge) {
-                                activeInteractiveAge = null;
-                            } else {
-                                activeInteractiveAge = selectedAge;
-                            }
-                            filterData();
-                        }
+                    scales: {
+                        x: { grid: { display: false }, ticks: { font: { family: 'Plus Jakarta Sans', size: 11 } } },
+                        y: { grid: { color: '#f1f5f9' }, ticks: { font: { family: 'Plus Jakarta Sans', size: 11 } } }
                     }
                 }
             });
         }
 
-        // TABLE & PAGINATION WITH CRUD ACTIONS
-        function getFilteredTableData() {
-            const query = document.getElementById('tableSearch').value.toLowerCase();
-            const yrVal = document.getElementById('globalYear').value;
-            const regSelect = document.getElementById('globalRegion').value;
-            const reg = activeInteractiveRegion || regSelect;
-
-            return censusData.filter(item => {
-                const matchYear = yrVal === 'all' || item.year === parseInt(yrVal);
-                const matchRegion = reg === 'all' || item.region === reg;
-                const matchAge = !activeInteractiveAge || item.age_group === activeInteractiveAge;
-                const matchQuery = item.province.toLowerCase().includes(query) ||
-                                   item.region.toLowerCase().includes(query) ||
-                                   item.age_group.toLowerCase().includes(query) ||
-                                   item.sex.toLowerCase().includes(query);
-                return matchYear && matchRegion && matchAge && matchQuery;
-            });
-        }
-
-        function renderTable() {
-            const filtered = getFilteredTableData();
-            const totalPages = Math.ceil(filtered.length / rowsPerPage) || 1;
-            if(currentPage > totalPages) currentPage = totalPages;
-
-            const start = (currentPage - 1) * rowsPerPage;
-            const paginated = filtered.slice(start, start + rowsPerPage);
-
-            const tbody = document.getElementById('dataTableBody');
+        // Render Census Data Explorer Table
+        function renderCensusTable() {
+            const searchTerm = (document.getElementById('tableSearch')?.value || '').toLowerCase();
+            const tbody = document.getElementById('censusTableBody');
             tbody.innerHTML = '';
 
-            const canEdit = currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Analyst');
+            const filtered = getFilteredData().filter(d => 
+                d.province.toLowerCase().includes(searchTerm) || 
+                d.region.toLowerCase().includes(searchTerm)
+            );
 
-            paginated.forEach(row => {
-                const actionBtns = canEdit ? `
-                    <button onclick="openEditRecordModal(${row.id})" class="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-all mr-1" title="แก้ไขรายการ">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                    </button>
-                    <button onclick="deleteRecord(${row.id})" class="text-rose-500 hover:text-rose-700 p-1 rounded hover:bg-rose-50 transition-all" title="ลบรายการ">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                ` : `<span class="text-slate-300 text-[10px]">ดูอย่างเดียว</span>`;
-
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50/80 transition-all">
-                        <td class="py-3 px-4 font-semibold text-slate-800">${row.year}</td>
-                        <td class="py-3 px-4">${row.region}</td>
-                        <td class="py-3 px-4">${row.province}</td>
-                        <td class="py-3 px-4"><span class="px-2 py-0.5 bg-slate-100 rounded-md text-[10px] font-semibold">${row.area}</span></td>
-                        <td class="py-3 px-4"><span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md text-[10px] font-semibold">${row.sex}</span></td>
-                        <td class="py-3 px-4">${row.age_group}</td>
-                        <td class="py-3 px-4 text-right font-bold text-slate-800">${row.value.toLocaleString()}</td>
-                        <td class="py-3 px-4 text-center crud-action-col">${actionBtns}</td>
-                    </tr>
+            filtered.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-bold text-slate-900">${item.province}</td>
+                    <td class="py-3 px-4"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">${item.region}</span></td>
+                    <td class="py-3 px-4 font-semibold text-slate-800">${item.population.toLocaleString()}</td>
+                    <td class="py-3 px-4 text-slate-500">${item.male.toLocaleString()}</td>
+                    <td class="py-3 px-4 text-slate-500">${item.female.toLocaleString()}</td>
+                    <td class="py-3 px-4 text-slate-500">${item.households.toLocaleString()}</td>
+                    <td class="py-3 px-4 text-right">
+                        ${currentUser && (currentUser.role === 'admin' || currentUser.role === 'analyst') ? `
+                            <button onclick="openEditModal(${index})" class="text-brand-600 hover:text-brand-800 font-bold mr-2"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteRecord(${index})" class="text-rose-500 hover:text-rose-700 font-bold"><i class="fa-solid fa-trash"></i></button>
+                        ` : `<span class="text-[10px] text-slate-400">View Only</span>`}
+                    </td>
                 `;
+                tbody.appendChild(tr);
             });
-
-            document.getElementById('tableCount').innerText = `แสดงผล ${filtered.length} จากทั้งหมด ${censusData.length} รายการ`;
-            document.getElementById('pageIndicator').innerText = `หน้า ${currentPage} / ${totalPages}`;
-            document.getElementById('prevBtn').disabled = currentPage === 1;
-            document.getElementById('nextBtn').disabled = currentPage === totalPages;
         }
 
-        function filterTable() {
-            currentPage = 1;
-            renderTable();
+        // Search Filter Handler
+        function handleGlobalSearch(val) {
+            const term = val.toLowerCase();
+            if (term) {
+                switchTab('records');
+                document.getElementById('tableSearch').value = term;
+                renderCensusTable();
+            }
         }
 
-        function prevPage() {
-            if(currentPage > 1) { currentPage--; renderTable(); }
-        }
-
-        function nextPage() {
-            const totalPages = Math.ceil(getFilteredTableData().length / rowsPerPage);
-            if(currentPage < totalPages) { currentPage++; renderTable(); }
-        }
-
-        // CENSUS DATA CRUD OPERATIONS
-        function openRecordModal() {
-            document.getElementById('recordModalTitle').innerText = 'เพิ่มข้อมูลสำมะโนประชากรใหม่';
-            document.getElementById('editRecordIndex').value = '';
-            document.getElementById('recordYear').value = 2553;
-            document.getElementById('recordRegion').value = 'ภาคกลาง';
-            document.getElementById('recordProvince').value = 'รวม';
-            document.getElementById('recordArea').value = 'รวม';
-            document.getElementById('recordSex').value = 'รวม';
-            document.getElementById('recordAgeGroup').value = 'รวม';
-            document.getElementById('recordValue').value = '';
-            document.getElementById('recordModal').classList.remove('hidden');
-        }
-
-        function openEditRecordModal(id) {
-            const rec = censusData.find(x => x.id === id);
-            if(!rec) return;
-            document.getElementById('recordModalTitle').innerText = 'แก้ไขข้อมูลสำมะโนประชากร';
-            document.getElementById('editRecordIndex').value = rec.id;
-            document.getElementById('recordYear').value = rec.year;
-            document.getElementById('recordRegion').value = rec.region;
-            document.getElementById('recordProvince').value = rec.province;
-            document.getElementById('recordArea').value = rec.area;
-            document.getElementById('recordSex').value = rec.sex;
-            document.getElementById('recordAgeGroup').value = rec.age_group;
-            document.getElementById('recordValue').value = rec.value;
-            document.getElementById('recordModal').classList.remove('hidden');
-        }
-
-        function closeRecordModal() {
-            document.getElementById('recordModal').classList.add('hidden');
-        }
-
-        function saveRecord(e) {
+        // Excel Upload Engine Handlers
+        function handleDragOver(e) { e.preventDefault(); e.stopPropagation(); }
+        function handleDragLeave(e) { e.preventDefault(); e.stopPropagation(); }
+        function handleFileDrop(e) {
             e.preventDefault();
-            const id = document.getElementById('editRecordIndex').value;
-            const year = parseInt(document.getElementById('recordYear').value);
-            const region = document.getElementById('recordRegion').value;
-            const province = document.getElementById('recordProvince').value.trim();
-            const area = document.getElementById('recordArea').value;
-            const sex = document.getElementById('recordSex').value;
-            const age_group = document.getElementById('recordAgeGroup').value.trim();
-            const value = parseInt(document.getElementById('recordValue').value);
-
-            if(id) {
-                const rec = censusData.find(x => x.id == id);
-                if(rec) {
-                    rec.year = year;
-                    rec.region = region;
-                    rec.province = province;
-                    rec.area = area;
-                    rec.sex = sex;
-                    rec.age_group = age_group;
-                    rec.value = value;
-                }
-            } else {
-                const newId = censusData.length ? Math.max(...censusData.map(x => x.id)) + 1 : 1;
-                censusData.unshift({ id: newId, year, region, province, area, sex, age_group, value });
+            e.stopPropagation();
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                processFile(e.dataTransfer.files[0]);
             }
-
-            closeRecordModal();
-            filterData(); // Recalculate Dashboard & Redraw Charts Realtime
         }
-
-        function deleteRecord(id) {
-            if(confirm('คุณแน่ใจหรือไม่ที่จะลบรายการข้อมูลนี้?')) {
-                censusData = censusData.filter(x => x.id !== id);
-                filterData(); // Recalculate Dashboard & Redraw Charts Realtime
+        function handleFileSelect(e) {
+            if (e.target.files && e.target.files[0]) {
+                processFile(e.target.files[0]);
             }
         }
 
-        // FILE UPLOAD & PARSING (EXCEL / CSV)
-        function handleFileUpload(e) {
-            const file = e.target.files[0];
-            if(!file) return;
-
+        function processFile(file) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, {type: 'array'});
-                const firstSheet = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheet];
-                const json = XLSX.utils.sheet_to_json(worksheet);
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.SheetNames[0];
+                    const json = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
 
-                if(json.length > 0) {
-                    let addedCount = 0;
-                    json.forEach(row => {
-                        if(row.year && row.region && row.value) {
-                            const newId = censusData.length ? Math.max(...censusData.map(x => x.id)) + 1 : 1;
-                            censusData.unshift({
-                                id: newId,
-                                year: parseInt(row.year),
-                                region: row.region,
-                                province: row.province || 'รวม',
-                                area: row.area || 'รวม',
-                                sex: row.sex || 'รวม',
-                                age_group: row.age_group || 'รวม',
-                                value: parseInt(row.value)
-                            });
-                            addedCount++;
-                        }
-                    });
+                    if (json && json.length > 0) {
+                        censusData = json.map(row => ({
+                            province: row.Province || row.province || 'Unknown',
+                            region: row.Region || row.region || 'Central',
+                            population: Number(row.Population || row.population || 0),
+                            male: Number(row.Male || row.male || 0),
+                            female: Number(row.Female || row.female || 0),
+                            households: Number(row.Households || row.households || 0)
+                        }));
 
-                    const status = document.getElementById('uploadStatus');
-                    status.className = "mt-6 p-4 rounded-2xl text-xs font-semibold text-center bg-emerald-50 text-emerald-700 border border-emerald-200";
-                    status.innerHTML = `<i class="fa-solid fa-circle-check mr-1.5"></i> อัปโหลดและนำเข้าข้อมูลสำเร็จ ${addedCount} รายการ! ฐานข้อมูลถูกอัปเดตแล้ว`;
-                    status.classList.remove('hidden');
-                    filterData();
+                        resetFilters();
+                        switchTab('dashboard');
+                    }
+                } catch (err) {
+                    alert("Error reading file. Please upload a valid Excel or CSV sheet.");
                 }
             };
             reader.readAsArrayBuffer(file);
         }
 
-        function downloadTemplate() {
-            const csvContent = "year,region,province,area,sex,age_group,value,unit,source\n2553,ทั่วประเทศ,รวม,รวม,รวม,รวม,65981659,คน,สำนักงานสถิติแห่งชาติ";
-            const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'census_template.csv';
-            a.click();
+        function resetToDefaultData() {
+            censusData = [...defaultCensusData];
+            resetFilters();
+            alert("Restored default Thailand Census Dataset.");
         }
 
-        // MEMBER MANAGEMENT (ADMIN)
-        function renderMemberTable() {
-            const tbody = document.getElementById('memberTableBody');
-            tbody.innerHTML = '';
-            users.forEach(u => {
-                let badgeColor = 'bg-blue-50 text-blue-700';
-                if(u.role === 'Viewer') badgeColor = 'bg-slate-100 text-slate-700';
-                if(u.role === 'Admin') badgeColor = 'bg-indigo-50 text-indigo-700';
-
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50/80 transition-all">
-                        <td class="py-3 px-4 font-bold text-slate-800">${u.username}</td>
-                        <td class="py-3 px-4">${u.name}</td>
-                        <td class="py-3 px-4"><span class="px-2.5 py-1 ${badgeColor} rounded-lg text-[10px] font-bold">${u.role}</span></td>
-                        <td class="py-3 px-4"><span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-[10px] font-bold">${u.status}</span></td>
-                        <td class="py-3 px-4 text-right">
-                            <button onclick="editUser(${u.id})" class="text-blue-600 hover:text-blue-800 px-2 py-1"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="deleteUser(${u.id})" class="text-rose-500 hover:text-rose-700 px-2 py-1"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
+        function exportToExcel() {
+            const ws = XLSX.utils.json_to_sheet(censusData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Thailand Census");
+            XLSX.writeFile(wb, "Thailand_Census_Data_2026.xlsx");
         }
 
-        function openAddUserModal() {
-            document.getElementById('userModalTitle').innerText = 'เพิ่มผู้ใช้งานใหม่';
-            document.getElementById('editUserId').value = '';
-            document.getElementById('modalUsername').value = '';
-            document.getElementById('modalPassword').value = '';
-            document.getElementById('modalFullname').value = '';
-            document.getElementById('modalRole').value = 'Viewer';
-            document.getElementById('userModal').classList.remove('hidden');
+        // Record Modals & CRUD
+        function openAddModal() {
+            if (currentUser.role === 'viewer') {
+                alert("Permission Denied: Viewer accounts cannot edit census records.");
+                return;
+            }
+            document.getElementById('modalTitle').textContent = "Add Census Record";
+            document.getElementById('entryIndex').value = "";
+            document.getElementById('entryForm').reset();
+            document.getElementById('entryModal').classList.remove('hidden');
         }
 
-        function editUser(id) {
-            const u = users.find(x => x.id === id);
-            if(!u) return;
-            document.getElementById('userModalTitle').innerText = 'แก้ไขข้อมูลผู้ใช้งาน';
-            document.getElementById('editUserId').value = u.id;
-            document.getElementById('modalUsername').value = u.username;
-            document.getElementById('modalPassword').value = u.pass;
-            document.getElementById('modalFullname').value = u.name;
-            document.getElementById('modalRole').value = u.role;
-            document.getElementById('userModal').classList.remove('hidden');
+        function openEditModal(idx) {
+            if (currentUser.role === 'viewer') {
+                alert("Permission Denied: Viewer accounts cannot edit census records.");
+                return;
+            }
+            const item = censusData[idx];
+            document.getElementById('modalTitle').textContent = "Edit Census Record";
+            document.getElementById('entryIndex').value = idx;
+            document.getElementById('entryProvince').value = item.province;
+            document.getElementById('entryRegion').value = item.region;
+            document.getElementById('entryPopulation').value = item.population;
+            document.getElementById('entryMale').value = item.male;
+            document.getElementById('entryFemale').value = item.female;
+            document.getElementById('entryHouseholds').value = item.households;
+            document.getElementById('entryModal').classList.remove('hidden');
         }
 
-        function closeUserModal() {
-            document.getElementById('userModal').classList.add('hidden');
+        function closeEntryModal() {
+            document.getElementById('entryModal').classList.add('hidden');
         }
 
-        function saveUser(e) {
+        function saveEntry(e) {
             e.preventDefault();
-            const id = document.getElementById('editUserId').value;
-            const username = document.getElementById('modalUsername').value.trim();
-            const pass = document.getElementById('modalPassword').value.trim();
-            const name = document.getElementById('modalFullname').value.trim();
-            const role = document.getElementById('modalRole').value;
+            const idx = document.getElementById('entryIndex').value;
+            const newRecord = {
+                province: document.getElementById('entryProvince').value,
+                region: document.getElementById('entryRegion').value,
+                population: Number(document.getElementById('entryPopulation').value),
+                male: Number(document.getElementById('entryMale').value),
+                female: Number(document.getElementById('entryFemale').value),
+                households: Number(document.getElementById('entryHouseholds').value)
+            };
 
-            if(id) {
-                const u = users.find(x => x.id == id);
-                if(u) { u.username = username; u.pass = pass; u.name = name; u.role = role; }
+            if (idx === "") {
+                censusData.push(newRecord);
             } else {
-                const newId = users.length ? Math.max(...users.map(x => x.id)) + 1 : 1;
-                users.push({ id: newId, username, pass, name, role, status: 'Active' });
+                censusData[idx] = newRecord;
             }
-            closeUserModal();
-            renderMemberTable();
+
+            closeEntryModal();
+            resetFilters();
         }
 
-        function deleteUser(id) {
-            if(confirm('ต้องการลบผู้ใช้งานนี้หรือไม่?')) {
-                users = users.filter(x => x.id !== id);
-                renderMemberTable();
+        function deleteRecord(idx) {
+            if (currentUser.role !== 'admin') {
+                alert("Permission Denied: Only Admin users can delete records.");
+                return;
             }
+            censusData.splice(idx, 1);
+            resetFilters();
         }
 
-        function exportCSV() {
-            let csv = 'year,region,province,area,sex,age_group,value\n';
-            censusData.forEach(row => {
-                csv += `${row.year},${row.region},${row.province},${row.area},${row.sex},${row.age_group},${row.value}\n`;
+        // Render Member Access Management Cards
+        function renderMembersList() {
+            const container = document.getElementById('membersList');
+            container.innerHTML = '';
+
+            users.forEach(u => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-50/80 rounded-2xl p-4 border border-slate-100 flex items-center justify-between";
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <img src="${u.avatar}" class="w-11 h-11 rounded-full object-cover border border-slate-200">
+                        <div>
+                            <div class="text-xs font-bold text-slate-800">${u.name}</div>
+                            <div class="text-[10px] text-slate-400 capitalize">${u.username}</div>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="px-3 py-1 rounded-full text-[10px] font-bold ${
+                            u.role === 'admin' ? 'bg-brand-100 text-brand-800' : 
+                            u.role === 'analyst' ? 'bg-blue-100 text-blue-800' : 'bg-slate-200 text-slate-700'
+                        }">${u.role.toUpperCase()}</span>
+                    </div>
+                `;
+                container.appendChild(card);
             });
-            const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'thailand_census_export.csv';
-            a.click();
+        }
+
+        function openAddMemberModal() {
+            if (currentUser.role !== 'admin') {
+                alert("Permission Denied: Only administrators can add new team members.");
+                return;
+            }
+            const name = prompt("Enter Member Full Name:");
+            if (name) {
+                users.push({
+                    name: name,
+                    role: 'analyst',
+                    username: name.toLowerCase().replace(/\s+/g, ''),
+                    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80'
+                });
+                renderMembersList();
+            }
         }
     </script>
 </body>
